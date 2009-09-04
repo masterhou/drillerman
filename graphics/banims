@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+suffix=$1
+l=`ls -1 *.png`
+
+rm -f tmp tmp2
+touch tmp tmp2
+
+for f in $l ; do
+	n=`echo $f | cut -d. -f1 | cut -d_ -f1`
+	c=`cat tmp | grep "${n}!" | wc -l`
+	
+	echo "${n}!" >> tmp2
+	
+	if [ $c -eq 0 ] ; then
+		echo "${n}!" >> tmp
+		#echo $n
+	fi
+done
+
+for p in `cat tmp` ; do
+
+
+	f=`cat tmp2 | grep $p | wc -l`
+	
+	p=`echo $p | cut "-d!" -f1`
+	echo "[${p}${suffix}]"
+	echo "frames=${f}"
+	echo "speed=20"
+	echo "reverse=1"
+	echo "repeat=1"
+
+	for (( i=1; i <= f; i++ )) ; do
+		fname="${p}_"`printf %02d ${i}`".png"
+		echo "frame(${i})=${fname}"
+	done
+
+done
+
+rm tmp tmp2

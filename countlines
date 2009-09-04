@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+cat *.c *.h *.cpp *.hpp *.cxx | sed -s '/^$/d' | wc -l

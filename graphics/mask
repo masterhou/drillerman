@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+
+#echo "Masking '$1' by '$2' producing '$3'"
+#convert "${1}" -alpha extract mask.png
+#convert "$1" "$2" -matte -compose CopyOpacity -composite "$3"
+#convert "$3" -alpha Shape "$3"
+#convert "mask.png" "$3" -compose Multiply -composite "$3"
+composite -compose Dst_In "$2" "$1" "$3"
+

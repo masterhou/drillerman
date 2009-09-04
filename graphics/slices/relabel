@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+for f in `ls -1 *.png` ; do
+	fname=`echo $f | cut -d. -f1`
+	y=`echo $fname | cut -d_ -f2`
+	x=`echo $fname | cut -d_ -f3`
+	#echo $x $y $xy
+	xy=$((y * 5 + x + 1))
+	xy=`printf %02d $xy`
+	fname=`echo $fname | cut -d_ -f1`"${xy}_01.png"
+	#echo "$f => $fname"
+	cp "$f" "$fname"
+	mv $fname ../out
+done
+
+rm -f *.html
