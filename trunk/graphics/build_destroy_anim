@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+n=`basename $1 | cut -d. -f1`
+
+d=${n}"-destroy"
+
+mkdir "$d"
+
+for (( i=1; i <= 14; i++ )) ; do
+	num=`printf %02d ${i}`
+	nf="${d}/${n}-destroy_${num}.png"
+
+	./mask "$1" "out/dmask_${num}.png" "${nf}"
+done
+ 

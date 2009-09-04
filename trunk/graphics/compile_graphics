@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+sudo cp banims /usr/bin/banims
+
+cwd=`pwd`
+
+gdir=$cwd/
+ddir=$cwd/../data
+odir=$cwd/out
+sdir=$cwd/../data/sprites
+
+echo "Renaming brick slices..."
+
+cd slices
+./relabel
+
+cd ${gdir}
+
+echo "Building brick destroy animation..."
+
+cp out/brick09_01.png brick.png
+./build_destroy_anim brick.png
+rm brick.png
+
+mv brick-destroy/* out
+rm -rf brick-destroy
+
+echo "Coloring bricks..."
+
+cd ${sdir}/levelset_default
+cp ${odir}/brick*.png .
+
+rm -rf red green blue yellow
+mkdir red green blue yellow
+
+mogrify -format png -modulate 100,100,83 -path red "*.png"
+mogrify -format png -modulate 100,100,133 -path green "*.png"
+mogrify -format png -modulate 100,100,193 -path blue "*.png"
+mogrify -format png -modulate 100,100,100 -path yellow "*.png"
+
+echo "Animating air..."
+
+cd ${sdir}/levelset_default
+rm -rf single
+mkdir single
+
+cp ${odir}/air* .
+convert airstart.png airend.png -morph 20 single/air_%02d.png
+rm single/air_00.png
+rm *.png
+
+echo "Building crate destroy anim..."
+
+cd ${gdir}
+./build_destroy_anim ${odir}/crate.png 
+mv crate-destroy/* ${sdir}/levelset_default/single
+rm -rf crate-destroy
+
+echo "Copying some things..."
+
+cp ${odir}/crate.png ${sdir}/levelset_default/single/crate_01.png
+cp ${odir}/dman*.png ${sdir}/levelset_default/single
+
+echo "Generating sprite lists..."
+
+cd ${sdir}/levelset_default/single
+banims > single.spr
+
+cd ${sdir}/levelset_default/red
+banims -red > red.spr
+
+cd ${sdir}/levelset_default/blue
+banims -blue > blue.spr
+
+cd ${sdir}/levelset_default/green
+banims -green > green.spr
+
+cd ${sdir}/levelset_default/yellow
+banims -yellow > yellow.spr

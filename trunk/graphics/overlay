@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+echo "Overlying '$1' onto '$2' producing '$3'"
+composite -compose Dst_Over "$1" "$2" "$3"
