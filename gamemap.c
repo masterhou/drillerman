@@ -7,6 +7,7 @@
 #include "sprites.h"
 #include "brickshape.h"
 #include "stack.h"
+#include "particles.h"
 
 typedef struct
 {
@@ -23,8 +24,26 @@ static SpriteClassId scidCrate;
 static SpriteClassId scidCrateHit[4];
 static SpriteClassId scidBricks[VF_BRICK_COUNT][_BRICK_TYPE_COUNT];
 static SpriteClassId scidDestroyAnim[VF_LAST];
+static SpriteClassId scidDestroyParticle[_DESTROY_PARTICLE_TYPE_COUNT];
 
 static bool needShapeUpdate;
+
+static void addDestroyParticles(int x, int y)
+{
+    Point p = {x: x * _BRICK_WIDTH + _BRICK_WIDTH / 2,
+               y: y * _BRICK_HEIGHT + _BRICK_HEIGHT / 2};
+    int i;
+
+    for(i = 0; i < _DESTROY_PARTICLE_COUNT; ++i)
+    {
+        Sprite *s = sngeAddSprite(scidDestroyParticle[rand() % _DESTROY_PARTICLE_TYPE_COUNT], p, 10);
+        Particle *p = particlesAdd(s);
+        particlesSetVelocityDegrees(p, rand() % 360, _DESTROY_PARTICLE_MAX_SPEED * commonRandD(), true);
+        particlesSetFading(p, _DESTROY_PARTICLE_FADE_SPEED, true);
+        p->rotateSpeed = _DESTROY_PARTICLE_MAX_ROT_SPEED * commonRandD();
+    }
+
+}
 
 void gameMapUpdateBrickShape()
 {
@@ -448,6 +467,7 @@ void gameMapDestroyBrick(int x, int y)
             field->sprite->frame = 0;
             field->sprite->destroy = true;
             field->sprite = NULL;
+            addDestroyParticles(bp.x, bp.y);
         }
 
         field->state = FS_VANISH;
@@ -502,6 +522,11 @@ void gameMapInit(int height, Difficulty difficulty)
         scidBricks[VF_BRICK_BLUE][i] = spritesGetIdByNameF("brick%02d-blue", i + 1);
         scidBricks[VF_BRICK_YELLOW][i] = spritesGetIdByNameF("brick%02d-yellow", i + 1);
     }
+
+
+    for(i = 0; i < _DESTROY_PARTICLE_TYPE_COUNT; ++i)
+        scidDestroyParticle[i] = spritesGetIdByNameF("dparticle-%d", i + 1);
+
 
     /* generate map structure */
 

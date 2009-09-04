@@ -165,3 +165,16 @@ frame(1)=bcglayer3.png
 [particle-1]
 frames=1
 frame(1)=particle1.png
+
+[dparticle-1]
+frames=1
+frame(1)=dparticle-1.png
+
+[dparticle-2]
+frames=1
+frame(1)=dparticle-1.png
+
+[dparticle-3]
+frames=1
+frame(1)=dparticle-1.png
+
