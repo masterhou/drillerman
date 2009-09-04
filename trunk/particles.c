@@ -202,6 +202,9 @@ void particlesFrame(float lag)
             }
         }
 
+        if(p->rotateSpeed != 0.0)
+            p->sprite->angle += lag * p->rotateSpeed;
+
         if(p->destroyScheduled)
         {
             sngeRemSprite(p->sprite->sid);

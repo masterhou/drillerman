@@ -16,7 +16,7 @@ typedef void (*ScreenInitFunc)(void *);
 typedef void (*ScreenCleanupFunc)(void);
 typedef int (*ScreenFrameFunc)(float);
 
-#define _FPS_ITEM_COUNT 10
+#define _FPS_ITEM_COUNT 20
 float fps[_FPS_ITEM_COUNT];
 int fpsItem = 0;
 
