@@ -16,6 +16,10 @@ typedef void (*ScreenInitFunc)(void *);
 typedef void (*ScreenCleanupFunc)(void);
 typedef int (*ScreenFrameFunc)(float);
 
+#define _FPS_ITEM_COUNT 10
+float fps[_FPS_ITEM_COUNT];
+int fpsItem = 0;
+
 typedef struct
 {
     ScreenInitFunc init;
@@ -38,6 +42,24 @@ static ScreenFuncs scrFuncs[SCR_LAST] =	{
     {init: &menuInit, cleanup: &menuCleanup, frame: &menuFrame},
     {init: &gameInit, cleanup: &gameCleanup, frame: &gameFrame}
 };
+
+static float getFps(float lag)
+{
+    fps[fpsItem] = 1.0 / lag;
+    fpsItem++;
+    fpsItem %= _FPS_ITEM_COUNT;
+
+    int i;
+    float cfps = 0.0f;
+
+    for(i = 0; i < _FPS_ITEM_COUNT; ++i)
+        cfps += fps[i] / (float)_FPS_ITEM_COUNT;
+
+    if(fpsItem == 0)
+        messageOutEx("FPS: %f\n", cfps);
+
+    return cfps;
+}
 
 void mainloopChangeScr(ScreenId newscr, void *data)
 {
@@ -102,11 +124,12 @@ void mainloopGo()
     fadeAmount = 1.0;
     fadeStatus = FS_FADEIN;
 
-
     while(!done)
     {
         lag = (double)(SDL_GetTicks() - oldticks) / 1000.0;
         oldticks = SDL_GetTicks();
+
+        getFps(lag);
 
         graphicsClearBuffer();
 
