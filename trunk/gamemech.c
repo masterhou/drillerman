@@ -108,6 +108,7 @@ static void updatePlayerPosition(float lag)
     int vx, vy;
     bool animationSet = false;
     bool additionalSupport = false;
+    Direction leanOutDirection = DIR_NONE;
     int i;
 
     physToVirtPos(playerPos.x, playerPos.y, &vx, &vy);
@@ -169,25 +170,34 @@ static void updatePlayerPosition(float lag)
 
     /* check if player has support */
 
-    bool has_support = gameMapIsSolid(vx, vy + 1);
+    bool hasSupport = gameMapIsSolid(vx, vy + 1);
 
+    /*
+       Check if the player is leaning out of the
+       main brick he is standing on causing him to
+       gain additional support.
+    */
     if(((float)_BRICK_WIDTH - hoff) < (float)_PLAYER_WIDTH2)
     {
-        has_support = has_support ||  gameMapIsSolid(vx + 1, vy + 1);
-        additionalSupport = true;
+        additionalSupport = gameMapIsSolid(vx + 1, vy + 1);
+        hasSupport = hasSupport ||  additionalSupport;
+        leanOutDirection = DIR_RIGHT;
     }
 
     if(hoff < (float)_PLAYER_WIDTH2)
     {
-        has_support = has_support ||  gameMapIsSolid(vx - 1, vy + 1);
-        additionalSupport = true;
+        additionalSupport = gameMapIsSolid(vx - 1, vy + 1);
+        hasSupport = hasSupport ||  additionalSupport;
+        leanOutDirection = DIR_LEFT;
     }
 
-
-    if(!has_support)
+    if(!hasSupport)
     {
         playerPos.y += (float)_PLAYER_FALL_SPEED * lag;
         changePlayerAnimation(scidPlayerFall);
+
+        /* cancel slipping move if player lost his support */
+        slipping = false;
         return;
     }
     else if(voff > 0)
@@ -196,6 +206,18 @@ static void updatePlayerPosition(float lag)
         voff = 0;
     }
 
+    /* process player slipping move */
+
+    if(slipping)
+    {
+        /* What if player suddenly gains support or his way
+           is blocked by a falling brick? Simple - it can't
+           happen because that would mean he was smashed. */
+
+        playerPos.x += lag * _PLAYER_SLIP_SPEED * directionDelta[slipDirection][0];
+    }
+
+
     /* check keystates and update position/animation accordingly */
 
     if(inputKeyState[drillKey])
@@ -203,22 +225,16 @@ static void updatePlayerPosition(float lag)
         animationSet = true;
         changePlayerAnimation(scidPlayerDrill[playerDirection]);
 
+        /* exact point where the brick was hit */
         float hx, hy;
-        bool hit = false;
+        bool destroyed = false;
 
         if(voff < _HIT_DISTANCE_THRESHOLD)
         {
             if(playerDirection > DIR_RIGHT)
             {
-                int bx, by;
+                destroyed = hitField(vx, vy + directionDelta[playerDirection][1]);
 
-                physToVirtPos(playerPos.x, playerPos.y, &bx, &by);
-
-                by += directionDelta[playerDirection][1];
-
-                hit = hitField(bx, by);
-
-                hit = true;
                 hx = playerPos.x;
                 hy = vy * _BRICK_HEIGHT;
 
@@ -228,7 +244,7 @@ static void updatePlayerPosition(float lag)
 
             if(playerDirection == DIR_LEFT && hoff < (_HIT_DISTANCE_THRESHOLD + _PLAYER_WIDTH2))
             {
-                hit = hitField(vx - 1, vy);
+                destroyed = hitField(vx - 1, vy);
 
                 hx = vx * _BRICK_WIDTH;
                 hy = vy * _BRICK_HEIGHT + _BRICK_HEIGHT / 2;
@@ -236,22 +252,39 @@ static void updatePlayerPosition(float lag)
 
             if(playerDirection == DIR_RIGHT && (_BRICK_WIDTH - _PLAYER_WIDTH2 - hoff) < _HIT_DISTANCE_THRESHOLD)
             {
-                hit = hitField(vx + 1, vy);
+                destroyed = hitField(vx + 1, vy);
 
                 hx = (vx + 1) * _BRICK_WIDTH;
                 hy = vy * _BRICK_HEIGHT + _BRICK_HEIGHT / 2;
             }
 
-            if(hit)
+            if(destroyed)
             {
                 addHitParticles(hx, hy, playerDirection);
+
+                /*
+                    Cause player to slip off the brick he is standing off
+                    if he is leaning out towards newly created empty space.
+                    This will prevent those moments of confusion when
+                    player destroys a brick beneath and doesn't fall because
+                    he has additional support.
+                */
+                if(playerDirection == DIR_DOWN && additionalSupport)
+                {
+                    slipping = true;
+
+                    if(leanOutDirection == DIR_LEFT)
+                        slipDirection = DIR_RIGHT;
+                    else
+                        slipDirection = DIR_LEFT;
+                }
             }
 
         }
     }
     else
         for(i = 0; i < DIR_UP; ++i)
-            if(inputKeyState[directionKey[i]])
+            if(inputKeyState[directionKey[i]] && !slipping)
             {
                 animationSet = true;
                 changePlayerAnimation(scidPlayerWalk[i]);

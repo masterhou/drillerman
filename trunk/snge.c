@@ -21,6 +21,9 @@ static Point viewportPos;
 
 void sngeRelativizeSprite(Sprite *sprite)
 {
+    if(sprite->relative)
+        return;
+
     sprite->relative = true;
     sprite->x -= viewportPos.x;
     sprite->y -= viewportPos.y;
