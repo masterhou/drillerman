@@ -27,5 +27,6 @@ int gameMapIsSolid(int x, int y);
 void gameMapCleanup();
 void gameMapDestroyBrick(int x, int y);
 FieldType gameMapGetFieldType(int x, int y);
+bool gameMapIsAirGetAir(int x, int y, Sprite **psprite);
 
 #endif

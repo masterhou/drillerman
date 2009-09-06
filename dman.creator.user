@@ -57,14 +57,14 @@
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >all</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList" >
     <value type="QString" >ALSA_PLUGINS_DIR=/usr/lib/alsa-lib</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-4N2W7JZZMB,guid=31f93e27f4eeea20b20816294aa04999</value>
-    <value type="QString" >DESKTOP_SESSION=default</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-pQYFfEP9xc,guid=45c1a4dfdaa1f6d2c9e734d94aa1319a</value>
+    <value type="QString" >DESKTOP_SESSION=kde</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-6UtbkC/S.gpg-agent:7237:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-G051ng/S.gpg-agent:3889:1</value>
     <value type="QString" >GS_LIB=/home/dsh/.fonts</value>
-    <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/home/dsh/.gtkrc-2.0::/home/dsh/.kde4/share/config/gtkrc-2.0</value>
+    <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/home/dsh/.gtkrc-2.0:/home/dsh/.gtkrc-2.0-kde4:/home/dsh/.kde4/share/config/gtkrc-2.0</value>
     <value type="QString" >GTK_RC_FILES=/etc/gtk/gtkrc:/home/dsh/.gtkrc::/home/dsh/.kde4/share/config/gtkrc</value>
     <value type="QString" >G_BROKEN_FILENAMES=1</value>
     <value type="QString" >HISTCONTROL=erasedups</value>
@@ -82,8 +82,7 @@
     <value type="QString" >LESS=-R</value>
     <value type="QString" >LOGNAME=dsh</value>
     <value type="QString" >MOZ_PLUGIN_PATH=/usr/lib/mozilla/plugins</value>
-    <value type="QString" >OOO_FORCE_DESKTOP=gnome</value>
-    <value type="QString" >PATH=/bin:/usr/bin:/sbin:/usr/sbin:/opt/java/jre/bin:/opt/kde/bin:/usr/bin/perlbin/site:/usr/bin/perlbin/vendor:/usr/bin/perlbin/core:/opt/qt/bin</value>
+    <value type="QString" >PATH=/bin:/usr/bin:/sbin:/usr/sbin:/opt/java/jre/bin:/usr/bin/perlbin/site:/usr/bin/perlbin/vendor:/usr/bin/perlbin/core:/opt/qt/bin</value>
     <value type="QString" >PKG_CONFIG_PATH=/usr/lib/pkgconfig:/opt/qt/lib/pkgconfig</value>
     <value type="QString" >PS3=> </value>
     <value type="QString" >PS4=+ </value>
@@ -91,20 +90,20 @@
     <value type="QString" >QTDIR=/opt/qt</value>
     <value type="QString" >QT_PLUGIN_PATH=/home/dsh/.kde4/lib/kde4/plugins/:/usr/lib/kde4/plugins/</value>
     <value type="QString" >QT_XFT=true</value>
-    <value type="QString" >SESSION_MANAGER=local/meve:@/tmp/.ICE-unix/7294,unix/meve:/tmp/.ICE-unix/7294</value>
+    <value type="QString" >SESSION_MANAGER=local/eve:@/tmp/.ICE-unix/3946,unix/eve:/tmp/.ICE-unix/3946</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
-    <value type="QString" >SSH_AGENT_PID=7240</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-TKHQff7239/agent.7239</value>
+    <value type="QString" >SSH_AGENT_PID=3892</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-IWINPc3891/agent.3891</value>
     <value type="QString" >USER=dsh</value>
     <value type="QString" >WINDOWPATH=7</value>
-    <value type="QString" >XCURSOR_THEME=Oxygen_Black</value>
+    <value type="QString" >XCURSOR_THEME=Oxygen_Yellow_Big</value>
     <value type="QString" >XDG_CACHE_HOME=/home/dsh/.cache</value>
     <value type="QString" >XDG_CONFIG_DIRS=/etc/xdg:/etc/xdg</value>
     <value type="QString" >XDG_CONFIG_HOME=/home/dsh/.config</value>
-    <value type="QString" >XDG_DATA_DIRS=/usr/share:/usr/local/share:/usr/share:/usr/local/share:/opt/kde/share:/opt/kde/share</value>
+    <value type="QString" >XDG_DATA_DIRS=/usr/share:/usr/local/share:/usr/share:/usr/local/share</value>
     <value type="QString" >XDG_DATA_HOME=/home/dsh/.local/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=cea8f0342c848bdca843ff474a08174d-1252018583.592415-932221455</value>
+    <value type="QString" >XDG_SESSION_COOKIE=1fac5d0108c66f1c17ef14d74a0700d8-1252077976.315085-210560909</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
    </valuelist>
    <valuelist key="abstractProcess.arguments" type="QVariantList" >

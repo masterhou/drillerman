@@ -19,6 +19,13 @@ static Sprite **Sprites;
 static SpriteId highestId;
 static Point viewportPos;
 
+void sngeRelativizeSprite(Sprite *sprite)
+{
+    sprite->relative = true;
+    sprite->x -= viewportPos.x;
+    sprite->y -= viewportPos.y;
+}
+
 static void sortByLayer()
 {
     int i, j;

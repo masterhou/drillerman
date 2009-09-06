@@ -10,9 +10,11 @@
 #include "gamebcg.h"
 #include "particles.h"
 
-static char directionName[4][50] = {"left", "right", "up", "down"};
-static int directionKey[4] = {SDLK_LEFT, SDLK_RIGHT, SDLK_UP, SDLK_DOWN};
-static int directionDelta[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+typedef enum {DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN, DIR_COUNT, DIR_NONE} Direction;
+
+static char directionName[DIR_COUNT][50] = {"left", "right", "up", "down"};
+static int directionKey[DIR_COUNT] = {SDLK_LEFT, SDLK_RIGHT, SDLK_UP, SDLK_DOWN};
+static int directionDelta[DIR_COUNT][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 static int drillKey = SDLK_SPACE;
 
 static SpriteClassId scidPlayer;
@@ -30,14 +32,16 @@ static int mapHeight;
 static int mapWidth = _MAP_WIDTH;
 
 static Point playerPos;
-static int playerDirection;
+static Direction playerDirection;
 
 static Sprite *player;
 
+static Direction slipDirection;
+static bool slipping;
 static bool goingUp;
 static bool goingUpTrigger;
 static float goingUpShift;
-static int goingUpDirection;
+static Direction goingUpDirection;
 static TimerHandle goingUpTimer;
 
 static void physToVirtPos(float px, float py, int *vx, int *vy)
@@ -61,28 +65,54 @@ static inline void changePlayerAnimation(SpriteClassId scid)
     player->frame = 0;
 }
 
-static inline void hitField(int x, int y)
+static inline bool hitField(int x, int y)
 {
     if(!INBOUND(x, y, mapWidth, mapHeight))
-        return;
+        return false;
 
     FieldType ft = gameMapGetFieldType(x, y);
 
     inputKeyState[drillKey] = 0;
 
     if(ft < VF_BRICK_COUNT)
+    {
         gameMapDestroyBrick(x, y);
+        return true;
+    }
+
+    return false;
+}
+
+static void addHitParticles(int x, int y, Direction hitDirection)
+{
+    int k;
+
+    for(k = 0; k < _HIT_PARTICLE_COUNT; ++k)
+    {
+        Sprite *sp = sngeAddSprite(scidParticle, point(0, 0), 100);
+        sp->x = x;
+        sp->y = y;
+        Particle *p = particlesAdd(sp);
+        particlesSetVelocity(p,
+                             -(float)directionDelta[hitDirection][0] * _HIT_PARTICLE_FALL_SPEED * commonRandD() +
+                             (float)directionDelta[hitDirection][1] * _HIT_PARTICLE_FALL_SPEED * (commonRandD() - 0.5),
+                             -(float)directionDelta[hitDirection][1] * _HIT_PARTICLE_FALL_SPEED * commonRandD() +
+                             (float)directionDelta[hitDirection][0] * _HIT_PARTICLE_FALL_SPEED * (commonRandD() - 0.5), true);
+
+        particlesSetFading(p, _HIT_PARTICLE_FADE_SPEED, true);
+    }
 }
 
 static void updatePlayerPosition(float lag)
 {
     int vx, vy;
-    int animation_set = 0;
+    bool animationSet = false;
+    bool additionalSupport = false;
     int i;
 
     physToVirtPos(playerPos.x, playerPos.y, &vx, &vy);
 
-    for(i = 0; i < 4; ++i)
+    for(i = 0; i < DIR_COUNT; ++i)
         if(inputKeyState[directionKey[i]])
             playerDirection = i;
 
@@ -139,10 +169,20 @@ static void updatePlayerPosition(float lag)
 
     /* check if player has support */
 
-    int has_support = gameMapIsSolid(vx, vy + 1);
+    bool has_support = gameMapIsSolid(vx, vy + 1);
 
-    if(((float)_BRICK_WIDTH - hoff) < _PLAYER_WIDTH)
+    if(((float)_BRICK_WIDTH - hoff) < (float)_PLAYER_WIDTH2)
+    {
         has_support = has_support ||  gameMapIsSolid(vx + 1, vy + 1);
+        additionalSupport = true;
+    }
+
+    if(hoff < (float)_PLAYER_WIDTH2)
+    {
+        has_support = has_support ||  gameMapIsSolid(vx - 1, vy + 1);
+        additionalSupport = true;
+    }
+
 
     if(!has_support)
     {
@@ -160,7 +200,7 @@ static void updatePlayerPosition(float lag)
 
     if(inputKeyState[drillKey])
     {
-        animation_set = 1;
+        animationSet = true;
         changePlayerAnimation(scidPlayerDrill[playerDirection]);
 
         float hx, hy;
@@ -168,67 +208,52 @@ static void updatePlayerPosition(float lag)
 
         if(voff < _HIT_DISTANCE_THRESHOLD)
         {
-            if(playerDirection > 1)
+            if(playerDirection > DIR_RIGHT)
             {
                 int bx, by;
-                physToVirtPos(playerPos.x + (_PLAYER_WIDTH / 2), playerPos.y, &bx, &by);
+
+                physToVirtPos(playerPos.x, playerPos.y, &bx, &by);
 
                 by += directionDelta[playerDirection][1];
 
-                hitField(bx, by);
+                hit = hitField(bx, by);
 
                 hit = true;
-                hx = playerPos.x + (_PLAYER_WIDTH / 2);
+                hx = playerPos.x;
                 hy = vy * _BRICK_HEIGHT;
 
-                if(playerDirection == 3)
+                if(playerDirection == DIR_DOWN)
                     hy += _BRICK_HEIGHT;
             }
 
-            if(playerDirection == 0 && hoff < _HIT_DISTANCE_THRESHOLD)
+            if(playerDirection == DIR_LEFT && hoff < (_HIT_DISTANCE_THRESHOLD + _PLAYER_WIDTH2))
             {
-                hitField(vx - 1, vy);
+                hit = hitField(vx - 1, vy);
 
-                hit = true;
                 hx = vx * _BRICK_WIDTH;
-                hy = vy * _BRICK_HEIGHT + (_BRICK_HEIGHT / 2);
+                hy = vy * _BRICK_HEIGHT + _BRICK_HEIGHT / 2;
             }
 
-            if(playerDirection == 1 && (_BRICK_WIDTH - _PLAYER_WIDTH - hoff) < _HIT_DISTANCE_THRESHOLD)
+            if(playerDirection == DIR_RIGHT && (_BRICK_WIDTH - _PLAYER_WIDTH2 - hoff) < _HIT_DISTANCE_THRESHOLD)
             {
-                hitField(vx + 1, vy);
+                hit = hitField(vx + 1, vy);
 
-                hit = true;
                 hx = (vx + 1) * _BRICK_WIDTH;
-                hy = vy * _BRICK_HEIGHT + (_BRICK_HEIGHT / 2);
+                hy = vy * _BRICK_HEIGHT + _BRICK_HEIGHT / 2;
             }
 
             if(hit)
             {
-                int k;
-
-                for(k = 0; k < _HIT_PARTICLE_COUNT; ++k)
-                {
-                    Sprite *sp = sngeAddSprite(scidParticle, point(0, 0), 100);
-                    sp->x = hx;
-                    sp->y = hy;
-                    Particle *p = particlesAdd(sp);
-                    particlesSetVelocity(p,
-                                         -(float)directionDelta[playerDirection][0] * _HIT_PARTICLE_FALL_SPEED * commonRandD() +
-                                         (float)directionDelta[playerDirection][1] * _HIT_PARTICLE_FALL_SPEED * (commonRandD() - 0.5),
-                                         -(float)directionDelta[playerDirection][1] * _HIT_PARTICLE_FALL_SPEED * commonRandD() +
-                                         (float)directionDelta[playerDirection][0] * _HIT_PARTICLE_FALL_SPEED * (commonRandD() - 0.5), true);
-
-                    particlesSetFading(p, _HIT_PARTICLE_FADE_SPEED, true);
-                }
+                addHitParticles(hx, hy, playerDirection);
             }
+
         }
     }
     else
-        for(i = 0; i < 2; ++i)
+        for(i = 0; i < DIR_UP; ++i)
             if(inputKeyState[directionKey[i]])
             {
-                animation_set = 1;
+                animationSet = true;
                 changePlayerAnimation(scidPlayerWalk[i]);
 
                 float dx = (float)directionDelta[i][0] * lag * _PLAYER_SPEED;
@@ -237,7 +262,7 @@ static void updatePlayerPosition(float lag)
                 float cpx = playerPos.x + dx;
 
                 if(gameMapIsSolid(cvx, vy))
-                    if(!NO_COLLISION(cpx, 0, _PLAYER_WIDTH, 1,  cvx * _BRICK_WIDTH, 0, _BRICK_WIDTH, 1))
+                    if(!NO_COLLISION(cpx - _PLAYER_WIDTH2, 0, _PLAYER_WIDTH, 1,  cvx * _BRICK_WIDTH, 0, _BRICK_WIDTH, 1))
                     {
                         if(!gameMapIsSolid(cvx, vy - 1) && !gameMapIsSolid(vx, vy - 1) && !goingUp && !goingUpTrigger)
                         {
@@ -245,17 +270,17 @@ static void updatePlayerPosition(float lag)
                                 goingUpTrigger = true;
                                 goingUpShift = 0;
                                 goingUpDirection = i;
-                                goingUpTimer = timerAddTimer(_DELAY_BEFORE_JUMP, 1);
+                                goingUpTimer = timerAddTimer(_DELAY_BEFORE_CLIMB, 1);
                         }
 
-                        animation_set = 0;
+                        animationSet = false;
                         break;
                     }
 
                 playerPos.x += dx;
             }
 
-    if(!animation_set)
+    if(!animationSet)
         changePlayerAnimation(scidPlayerStand[playerDirection]);
 
 
@@ -289,7 +314,7 @@ void gameMechInit(int mapheight, Difficulty difficulty)
     playerDirection = 3;
     player = sngeAddSprite(scidPlayerStand[playerDirection], point(0, 0), 6);
     player->relative = true;
-    playerPos = point((_MAP_WIDTH / 2) * _BRICK_WIDTH + ((_BRICK_WIDTH - _PLAYER_WIDTH) / 2), 0);
+    playerPos = point((_MAP_WIDTH / 2) * _BRICK_WIDTH + (_BRICK_WIDTH / 2), 0);
     viewportPos.y = - _MAP_OFFSET_Y + playerPos.y - goingUpShift;
 
     goingUp = false;
@@ -297,9 +322,16 @@ void gameMechInit(int mapheight, Difficulty difficulty)
     goingUpTrigger = false;
 }
 
+static void collectItems()
+{
+    Sprite *itemSprite;
+
+}
+
 void gameMechFrame(float lag)
 {
     updatePlayerPosition(lag);
+    collectItems();
 
     float oldy = viewportPos.y;
 
@@ -310,7 +342,7 @@ void gameMechFrame(float lag)
 
     sngeMoveViewport(viewportPos);
 
-    player->x = playerPos.x - _PLAYER_SPRITE_PADDING_X + _MAP_OFFSET_X;
+    player->x = playerPos.x - _PLAYER_WIDTH2 - _PLAYER_SPRITE_PADDING_X + _MAP_OFFSET_X;
     player->y = - _PLAYER_SPRITE_PADDING_Y - (_PLAYER_HEIGHT - _BRICK_HEIGHT) + _MAP_OFFSET_Y;
 }
 
