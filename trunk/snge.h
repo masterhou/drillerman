@@ -47,6 +47,7 @@ void sngeUpdateAnim(float lag);
 void sngeDraw();
 Point sngeGetTextSize(Sprite *psprite);
 void sngeMoveViewport(Point newpos);
+void sngeRelativizeSprite(Sprite *sprite);
 
 
 

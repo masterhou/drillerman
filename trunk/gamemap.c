@@ -1,6 +1,7 @@
 #include "gamemap.h"
 
 #include <math.h>
+#include <stdlib.h>
 
 #include "defaults.h"
 #include "common.h"
@@ -187,6 +188,23 @@ inline static void pushAdjacentSameBricks(Stack *pstack, PointI bp, FieldType ft
             tmp.y--;
             stackPush(pstack, &tmp);
         }
+
+}
+
+bool gameMapIsAirGetAir(int x, int y, Sprite **psprite)
+{
+    if(map[x][y].type != VF_AIR)
+        return false;
+
+    *psprite = map[x][y].sprite;
+
+    map[x][y].sprite = NULL;
+    map[x][y].type = VF_NONE;
+    map[x][y].supported = 0;
+    map[x][y].justhit = 0;
+    map[x][y].state = FS_NORM;
+
+    return true;
 
 }
 
@@ -551,9 +569,20 @@ void gameMapInit(int height, Difficulty difficulty)
     commonFree2DTable((void**)tmp, mapWidth);
 
     for(i = 0; i < mapWidth; ++i)
-        map[i][0].type = VF_CRATE;
+    {
+        map[i][0].type = VF_NONE;
+        map[i][1].type = VF_CRATE;
 
-    map[mapWidth / 2][0].type = VF_NONE;
+        int k;
+
+        for(k = 0; k < VF_BRICK_COUNT; ++k)
+            if(abs((mapWidth / 2) - i) <= k)
+                map[i][k + 1].type = k;
+            else
+                map[i][k + 1].type = VF_CRATE;
+    }
+
+
 }
 
 void gameMapCleanup()
