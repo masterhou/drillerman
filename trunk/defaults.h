@@ -1,7 +1,7 @@
 #ifndef DEFAULTS_H
 #define DAFAULTS_H
 
-#define _SCREEN_WIDTH 660
+#define _SCREEN_WIDTH 800
 #define _SCREEN_HEIGHT 600
 
 #define _MAP_WIDTH 11
@@ -57,6 +57,12 @@
 #define _DESTROY_PARTICLE_FADE_SPEED 1.0
 #define _DESTROY_PARTICLE_MAX_SPEED 400.0
 #define _DESTROY_PARTICLE_MAX_ROT_SPEED 360.0
+
+#define _AIR_DEST_X 700.0
+#define _AIR_DEST_Y 200.0
+#define _AIR_FLY_SPEED 600.0
+#define _AIR_ROT_SPEED 720.0
+#define _AIR_TRAIL_SPACING 20.0
 
 #ifndef _DATA_PATH 
 #define _DATA_PATH "./data/"
