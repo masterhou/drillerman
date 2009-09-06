@@ -109,19 +109,29 @@ void particlesSetTimeout(Particle *particle, float timeout)
     particle->timer = 0;
 }
 
-void particleSetDestination(Particle *particle, Point destination, float speed)
+void particlesSetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival)
 {
     particle->distance = 0.0;
 
-    float dx = particle->sprite->x - destination.x;
-    float dy = particle->sprite->y - destination.y;
+    float dx = destination.x - particle->sprite->x;
+    float dy = destination.y - particle->sprite->y;
 
     particle->distanceLimit = sqrtf(SQR(dx) + SQR(dy));
 
     particle->vx = (dx / particle->distanceLimit) * speed;
     particle->vy = (dy / particle->distanceLimit) * speed;
 
-    particle->flags |= PF_DESTROY_ON_DISTANCE;
+    if(destroyOnArrival)
+        particle->flags |= PF_DESTROY_ON_DISTANCE;
+    else
+        particle->flags |= PF_STOP_ON_DISTANCE;
+    
+    if(fadeOut)
+    {
+        float fadeSpeed = particle->sprite->opacity / (particle->distanceLimit / speed);
+        particlesSetFading(particle, fadeSpeed, true);
+    }
+
 }
 
 Particle *particlesClone(Particle *particle)
@@ -167,10 +177,10 @@ void particlesFrame(float lag)
             p->sprite->y += dy;
 
 
-            if(p->flags & PF_DESTROY_ON_DISTANCE || p->flags & PF_LEAVE_TRAIL)
+            if(p->flags & PF_DESTROY_ON_DISTANCE || p->flags & PF_LEAVE_TRAIL || p->flags & PF_STOP_ON_DISTANCE)
             {
                 dx = p->sprite->x - p->oldPos.x;
-                dy = p->sprite->x - p->oldPos.y;
+                dy = p->sprite->y - p->oldPos.y;
 
                 p->oldPos.x = p->sprite->x;
                 p->oldPos.y = p->sprite->y;
@@ -178,11 +188,19 @@ void particlesFrame(float lag)
                 p->distance += sqrtf(SQR(dx) + SQR(dy));
             }
 
-            if(p->flags & PF_DESTROY_ON_DISTANCE)
+            if(p->distance >= p->distanceLimit)
             {
-                if(p->distance >= p->distanceLimit)
+                if(p->flags & PF_STOP_ON_DISTANCE)
+                {
+                    p->vx = 0.0;
+                    p->vy = 0.0;
+                    p->rotateSpeed = 0.0;
+                }
+
+                if(p->flags & PF_DESTROY_ON_DISTANCE)
                     p->destroyScheduled = true;
             }
+
         }
 
         if(p->flags & PF_DESTROY_ON_TIMEOUT)
@@ -231,9 +249,10 @@ void particlesFrame(float lag)
 
                 p->oldTrailDistance = p->distance - dd + p->trailSpacing;
 
-                np->vx = 0;
-                np->vy = 0;
+                np->vx = 0.0;
+                np->vy = 0.0;
                 np->sprite->animdir = 0;
+                np->rotateSpeed = 0.0;
                 np->fadeSpeed = p->trailFadeSpeed;
                 np->flags &= ~PF_LEAVE_TRAIL;
                 np->flags &= ~PF_GRAVITY_AFFECTED;

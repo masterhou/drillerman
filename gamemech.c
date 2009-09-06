@@ -44,18 +44,6 @@ static float goingUpShift;
 static Direction goingUpDirection;
 static TimerHandle goingUpTimer;
 
-static void physToVirtPos(float px, float py, int *vx, int *vy)
-{
-    *vx = px / (float)_BRICK_WIDTH;
-    *vy = py / (float)_BRICK_HEIGHT;
-}
-
-static void virtToPhysPos(int vx, int vy, float *px, float *py)
-{
-    *px = (float)vx * (float)_BRICK_WIDTH;
-    *py = (float)vy * (float)_BRICK_HEIGHT;
-}
-
 static inline void changePlayerAnimation(SpriteClassId scid)
 {
     if(player->sclass == scid)
@@ -105,13 +93,13 @@ static void addHitParticles(int x, int y, Direction hitDirection)
 
 static void updatePlayerPosition(float lag)
 {
-    int vx, vy;
     bool animationSet = false;
     bool additionalSupport = false;
     Direction leanOutDirection = DIR_NONE;
     int i;
 
-    physToVirtPos(playerPos.x, playerPos.y, &vx, &vy);
+    int vx = playerPos.x / (float)_BRICK_WIDTH;
+    int vy = playerPos.y / (float)_BRICK_HEIGHT;
 
     for(i = 0; i < DIR_COUNT; ++i)
         if(inputKeyState[directionKey[i]])
@@ -358,6 +346,23 @@ void gameMechInit(int mapheight, Difficulty difficulty)
 static void collectItems()
 {
     Sprite *itemSprite;
+
+    int vx = playerPos.x / (float)_BRICK_WIDTH;
+    int vy = playerPos.y / (float)_BRICK_HEIGHT;
+
+    if(gameMapIsAirGetAir(vx, vy, &itemSprite))
+    {
+        sngeRelativizeSprite(itemSprite);
+        Particle *p = particlesAdd(itemSprite);
+        particlesSetDestination(p, point(_AIR_DEST_X, _AIR_DEST_Y), _AIR_FLY_SPEED, true, false);
+
+        particlesSetTrail(p, _AIR_TRAIL_SPACING, p->fadeSpeed);
+        p->fadeSpeed /= 2.5;
+        p->rotateSpeed = _AIR_ROT_SPEED;
+        itemSprite->layer++;
+    }
+
+
 
 }
 

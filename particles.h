@@ -9,6 +9,7 @@
 #define PF_DESTROY_ON_TIMEOUT   8
 #define PF_GRAVITY_AFFECTED     16
 #define PF_LEAVE_TRAIL          32
+#define PF_STOP_ON_DISTANCE     64
 
 
 typedef struct
@@ -49,6 +50,7 @@ void particlesSetDestroyDistance(Particle *particle, float destroyDistance);
 void particlesSetTrail(Particle *particle, float trailSpacing, float trailFadeSpeed);
 Particle *particlesClone(Particle *particle);
 void particlesSetTimeout(Particle *particle, float timeout);
+void particlesSetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival);
 void particlesFrame(float lag);
 
 #endif
