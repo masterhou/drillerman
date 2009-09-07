@@ -1,6 +1,7 @@
 #ifndef PARTICLES_H
 #define PARTICLES_H
 
+#include <inttypes.h>
 #include "common.h"
 #include "snge.h"
 
@@ -11,13 +12,13 @@
 #define PF_LEAVE_TRAIL          32
 #define PF_STOP_ON_DISTANCE     64
 #define PF_BLINKING             128
-
+#define PF_DESTROY_ON_ANIM_END  256
 
 typedef struct
 {
     Sprite *sprite;
 
-    unsigned char flags;
+    uint16_t flags;
     float distance;
     float fadeSpeed;
     float trailFadeSpeed;
@@ -54,5 +55,6 @@ void particlesSetTimeout(Particle *particle, float timeout);
 void particlesSetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival);
 void particlesFrame(float lag);
 void particlesSetBlinking(Particle *particle, float frequency);
+void particlesDestroyOnAnimationEnd(Particle *particle);
 
 #endif
