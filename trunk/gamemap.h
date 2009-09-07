@@ -19,6 +19,7 @@ typedef struct
     bool checked;
     bool justhit;
     int shakedir;
+    unsigned char crateState;
 } MapField;
 
 void gameMapFrame(float lag);
@@ -30,5 +31,6 @@ void gameMapCleanup();
 void gameMapDestroyBrick(int x, int y, bool blink);
 FieldType gameMapGetFieldType(int x, int y);
 bool gameMapIsAirGetAir(int x, int y, Sprite **psprite);
+bool gameMapHitCrate(int x, int y);
 
 #endif
