@@ -476,6 +476,27 @@ static void setBrickDestroying(MapField *field, int x, int y)
     field->type = VF_NONE;
 }
 
+bool gameMapHitCrate(int x, int y)
+{
+    MapField *field = &map[x][y];
+
+    if(field->type != VF_CRATE)
+        return false;
+
+    field->crateState++;
+
+    if(field->crateState == 5)
+    {
+        setBrickDestroying(field, x, y);
+        return true;
+    }
+
+    field->sprite->sclass = scidCrateHit[field->crateState - 1];
+    field->sprite->frame = 0;
+
+    return false;
+}
+
 void gameMapDestroyBrick(int x, int y, bool blink)
 {
     Stack bodyStack = stackAlloc(sizeof(PointI), 5);
@@ -580,6 +601,7 @@ void gameMapInit(int height, Difficulty difficulty)
             map[x][y].state = FS_NORM;
             map[x][y].particle = NULL;
             map[x][y].justhit = false;
+            map[x][y].crateState = 0;
         }
 
     commonFree2DTable((void**)tmp, mapWidth);

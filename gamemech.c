@@ -68,6 +68,12 @@ static inline bool hitField(int x, int y)
         return true;
     }
 
+    if(ft == VF_CRATE)
+    {
+        gameMapHitCrate(x, y);
+        return true;
+    }
+
     return false;
 }
 

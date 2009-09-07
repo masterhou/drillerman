@@ -178,3 +178,20 @@ frame(1)=dparticle-2.png
 frames=1
 frame(1)=dparticle-3.png
 
+[crate_hit_1]
+frames=1
+frame(1)=crate_hit_1.png
+
+[crate_hit_2]
+frames=1
+frame(1)=crate_hit_2.png
+
+[crate_hit_3]
+frames=1
+frame(1)=crate_hit_3.png
+
+[crate_hit_4]
+frames=1
+frame(1)=crate_hit_4.png
+
+
