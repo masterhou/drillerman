@@ -146,9 +146,7 @@ Particle *particlesClone(Particle *particle)
 
     Sprite *ns = sngeAddSprite(0, p, 0);
 
-    SpriteId sid = ns->sid;
     memcpy(ns, particle->sprite, sizeof(Sprite));
-    ns->sid = sid;
 
     Particle *np = malloc(sizeof(Particle));
     memcpy(np, particle, sizeof(Particle));
@@ -168,6 +166,17 @@ void particlesFrame(float lag)
     for(i = 0; i < count; ++i)
     {
         Particle *p = particles[i];
+
+        /* If something outside the particle
+           engine wants it destroyed. We have
+           to do it here because the sprite
+           can be already freed. */
+        if(p->destroyScheduled)
+        {
+            p->sprite->destroy = true;
+            free(p);
+            continue;
+        }
 
         if(p->rotateSpeed != 0.0)
             p->sprite->angle += lag * p->rotateSpeed;
@@ -250,7 +259,7 @@ void particlesFrame(float lag)
 
         if(p->destroyScheduled)
         {
-            sngeRemSprite(p->sprite->sid);
+            p->sprite->destroy = true;
             free(p);
         }
         else

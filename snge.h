@@ -8,7 +8,6 @@ typedef int SpriteId;
 
 typedef struct
 {
-    SpriteId sid;
     SpriteClassId sclass;
 
     float x;
@@ -28,7 +27,7 @@ typedef struct
     char vflip;
 
     float animdir;
-    bool destroy; /* destroy on animation end */
+    bool destroy; /* destroy on spriteCleanup */
     bool aended;
     bool relative; /* position relative to screen */
 
@@ -40,16 +39,12 @@ typedef struct
 void sngeInit();
 Sprite *sngeAddSprite(SpriteClassId sprclass, Point pos, int layer);
 inline Sprite *sngeAddFontSprite(SpriteClassId fontclass, Point pos, int layer, char *string);
-Sprite *sngeGetSpriteById(SpriteId sid);
-void sngeRemSprite(SpriteId sid);
 void sngeFreeSprites();
 void sngeUpdateAnim(float lag);
 void sngeDraw();
 Point sngeGetTextSize(Sprite *psprite);
 void sngeMoveViewport(Point newpos);
 void sngeRelativizeSprite(Sprite *sprite);
-
-
-
+void sngeCleanupSprites();
 
 #endif

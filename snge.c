@@ -14,9 +14,9 @@
         (0 > ((ty) + (th) - 1))			\
         )
 
-static int sngeSCount;
-static Sprite **Sprites;
-static SpriteId highestId;
+static int count;
+static int capacity;
+static Sprite **sprites;
 static Point viewportPos;
 
 void sngeRelativizeSprite(Sprite *sprite)
@@ -35,16 +35,16 @@ static void sortByLayer()
     int change;
     Sprite *tmp;
 
-    for(i = 0; i < (sngeSCount - 1); ++i)
+    for(i = 0; i < (count - 1); ++i)
     {
         change = 0;
 
-        for(j = 0; j < (sngeSCount - 1 - i); ++j)
-            if(Sprites[j + 1]->layer < Sprites[j]->layer)
+        for(j = 0; j < (count - 1 - i); ++j)
+            if(sprites[j + 1]->layer < sprites[j]->layer)
             {
-                tmp = Sprites[j + 1];
-                Sprites[j + 1] = Sprites[j];
-                Sprites[j] = tmp;
+                tmp = sprites[j + 1];
+                sprites[j + 1] = sprites[j];
+                sprites[j] = tmp;
                 change = 1;
             }
 
@@ -53,29 +53,11 @@ static void sortByLayer()
 
 }
 
-static int getIndexById(SpriteId sid)
-{
-
-    if(sngeSCount == 0 || sid > highestId)
-        return -1;
-
-    int i;
-
-    for(i = 0; i < sngeSCount; ++i)
-        if(Sprites[i]->sid == sid)
-            return i;
-
-    return -1;
-
-}
-
-
 void sngeInit()
 {
-    sngeSCount = 0;
-    Sprites = NULL;
-    highestId = 0x1234;
-
+    count = 0;
+    capacity = _SPRITE_ENGINE_CAPACITY_OVERHEAD;
+    sprites = malloc(sizeof(Sprite*) * capacity);
     viewportPos = point(0, 0);
 }
 
@@ -86,16 +68,18 @@ void sngeMoveViewport(Point newpos)
 
 Sprite *sngeAddSprite(SpriteClassId sprclass, Point pos, int layer)
 {
-    sngeSCount++;
-    highestId++;
+    count++;
 
-    Sprites = realloc(Sprites, sizeof(Sprite*) * sngeSCount);
+    if(count == capacity)
+    {
+        capacity += _SPRITE_ENGINE_CAPACITY_OVERHEAD;
+        sprites = realloc(sprites, sizeof(Sprite*) * capacity);
+    }
 
-    Sprites[sngeSCount - 1] = malloc(sizeof(Sprite));
+    sprites[count - 1] = malloc(sizeof(Sprite));
 
-    Sprite *s = Sprites[sngeSCount - 1];
+    Sprite *s = sprites[count - 1];
 
-    s->sid = highestId;
     s->sclass = sprclass;
     s->x = pos.x;
     s->y = pos.y;
@@ -128,58 +112,19 @@ inline Sprite *sngeAddFontSprite(SpriteClassId fontclass, Point pos, int layer, 
 }
 
 
-Sprite *sngeGetSpriteById(SpriteId sid)
-{
-    int i = getIndexById(sid);
-
-    if(i > -1)
-        return Sprites[i];
-
-    return NULL;
-}
-
-static void remSpriteByIndex(int index)
-{
-    free(Sprites[index]);
-
-    int i;
-
-    for(i = index; i < (sngeSCount - 1); ++i)
-        Sprites[i] = Sprites[i + 1];
-
-    sngeSCount--;
-
-    if(sngeSCount == 0)
-    {
-        free(Sprites);
-        Sprites = NULL;
-    }
-    //else
-        //Sprites = realloc(Sprites, sizeof(Sprite*) * sngeSCount);
-}
-
-void sngeRemSprite(SpriteId sid)
-{
-    int s = getIndexById(sid);
-
-    if(s == -1) return;
-
-    remSpriteByIndex(s);
-}
-
 void sngeFreeSprites()
 {
-    if(!Sprites) return;
+    if(!sprites) return;
 
     int i;
 
-    for(i = 0; i < sngeSCount; ++i)
-        free(Sprites[i]);
+    for(i = 0; i < count; ++i)
+        free(sprites[i]);
 
-    free(Sprites);
+    free(sprites);
 
-    sngeSCount = 0;
-    Sprites = NULL;
+    count = 0;
+    sprites = NULL;
 }
 
 Point sngeGetTextSize(Sprite *psprite)
@@ -193,19 +138,40 @@ Point sngeGetTextSize(Sprite *psprite)
     return sz;
 }
 
+void sngeCleanupSprites()
+{
+    Sprite **stmp = malloc(sizeof(Sprite*) * capacity);
+    int scount = 0;
+    int i;
+
+    for(i = 0; i < count; ++i)
+    {
+        Sprite *sp = sprites[i];
+
+        if(sp->destroy)
+        {
+            free(sp);
+        }
+        else
+        {
+            stmp[scount] = sp;
+            scount++;
+        }
+    }
+
+    count = scount;
+    free(sprites);
+    sprites = stmp;
+}
+
 void sngeUpdateAnim(float lag)
 {
     int i;
 
-    Sprite **stmp = malloc(sizeof(Sprite*) * sngeSCount);
-    int scount = 0;
-
-    bool delNeeded = false;
-
-    for(i = 0; i < sngeSCount; ++i)
+    for(i = 0; i < count; ++i)
     {
-        SpriteClass *sc = &spritesClasses[Sprites[i]->sclass];
-        Sprite *sp = Sprites[i];
+        SpriteClass *sc = &spritesClasses[sprites[i]->sclass];
+        Sprite *sp = sprites[i];
 
         int fc = sc->fcount;
         double fps = sc->fps;
@@ -233,9 +199,7 @@ void sngeUpdateAnim(float lag)
                 else
                 {
                     sp->frame = fc - 1;
-                    sp->aended = 1;
-                    if(sp->destroy)
-                        delNeeded = true;
+                    sp->aended = true;
                 }
 
             }
@@ -248,24 +212,6 @@ void sngeUpdateAnim(float lag)
         }
 
     }
-
-    if(delNeeded)
-    {
-        for(i = 0; i < sngeSCount; ++i)
-        {
-            Sprite *sp = Sprites[i];
-
-            if(!(sp->aended && sp->destroy))
-            {
-                stmp[scount] = sp;
-                scount++;
-            }
-        }
-
-        sngeSCount = scount;
-        free(Sprites);
-        Sprites = stmp;
-    }
 }
 
 void sngeDraw()
@@ -275,9 +221,9 @@ void sngeDraw()
     int i;
     int oldlayer = -100;
 
-    for(i = 0; i < sngeSCount; ++i)
+    for(i = 0; i < count; ++i)
     {
-        Sprite *s = Sprites[i];
+        Sprite *s = sprites[i];
         SpriteClassId scid = s->sclass;
         SpriteClass *sc = &spritesClasses[scid];
 

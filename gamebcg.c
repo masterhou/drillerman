@@ -78,7 +78,7 @@ void gameBcgCleanup()
     for(i = 0; i < _BCG_LAYER_COUNT; ++i)
     {
         for(j = 0; j < layers[i].count; ++j)
-            sngeRemSprite(layers[i].sprites[j]->sid);
+            layers[i].sprites[j]->destroy = true;
 
         free(layers[i].sprites);
     }
