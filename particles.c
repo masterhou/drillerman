@@ -55,6 +55,9 @@ static inline Particle *allocParticle()
 
 Particle *particlesAdd(Sprite *sprite)
 {
+    if(sprite == NULL)
+        return NULL;
+
     Particle *p = allocParticle();
 
     p->sprite = sprite;
