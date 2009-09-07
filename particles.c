@@ -140,6 +140,11 @@ void particlesSetDestination(Particle *particle, Point destination, float speed,
 
 }
 
+inline void particlesDestroyOnAnimationEnd(Particle *particle)
+{
+    particle->flags |= PF_DESTROY_ON_ANIM_END;
+}
+
 Particle *particlesClone(Particle *particle)
 {
     Point p;
@@ -166,6 +171,11 @@ void particlesFrame(float lag)
     for(i = 0; i < count; ++i)
     {
         Particle *p = particles[i];
+
+        if(p->flags & PF_DESTROY_ON_ANIM_END && p->sprite->aended)
+        {
+            p->destroyScheduled = true;
+        }
 
         /* If something outside the particle
            engine wants it destroyed. We have

@@ -483,7 +483,9 @@ void gameMapDestroyBrick(int x, int y)
         {
             field->sprite->sclass = scidDestroyAnim[field->type];
             field->sprite->frame = 0;
-            field->sprite->destroy = true;
+            Particle *p = particlesAdd(field->sprite);
+            particlesDestroyOnAnimationEnd(p);
+
             field->sprite = NULL;
             addDestroyParticles(bp.x, bp.y);
         }
