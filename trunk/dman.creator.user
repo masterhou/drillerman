@@ -57,12 +57,12 @@
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >all</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList" >
     <value type="QString" >ALSA_PLUGINS_DIR=/usr/lib/alsa-lib</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-pQYFfEP9xc,guid=45c1a4dfdaa1f6d2c9e734d94aa1319a</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-5KnHJhTwF3,guid=a28f22057ac84b552dde6ad84aa3ff75</value>
     <value type="QString" >DESKTOP_SESSION=kde</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-G051ng/S.gpg-agent:3889:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-fN7LbV/S.gpg-agent:3874:1</value>
     <value type="QString" >GS_LIB=/home/dsh/.fonts</value>
     <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/home/dsh/.gtkrc-2.0:/home/dsh/.gtkrc-2.0-kde4:/home/dsh/.kde4/share/config/gtkrc-2.0</value>
     <value type="QString" >GTK_RC_FILES=/etc/gtk/gtkrc:/home/dsh/.gtkrc::/home/dsh/.kde4/share/config/gtkrc</value>
@@ -90,11 +90,11 @@
     <value type="QString" >QTDIR=/opt/qt</value>
     <value type="QString" >QT_PLUGIN_PATH=/home/dsh/.kde4/lib/kde4/plugins/:/usr/lib/kde4/plugins/</value>
     <value type="QString" >QT_XFT=true</value>
-    <value type="QString" >SESSION_MANAGER=local/eve:@/tmp/.ICE-unix/3946,unix/eve:/tmp/.ICE-unix/3946</value>
+    <value type="QString" >SESSION_MANAGER=local/eve:@/tmp/.ICE-unix/3931,unix/eve:/tmp/.ICE-unix/3931</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
-    <value type="QString" >SSH_AGENT_PID=3892</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-IWINPc3891/agent.3891</value>
+    <value type="QString" >SSH_AGENT_PID=3877</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-DYFZUN3876/agent.3876</value>
     <value type="QString" >USER=dsh</value>
     <value type="QString" >WINDOWPATH=7</value>
     <value type="QString" >XCURSOR_THEME=Oxygen_Yellow_Big</value>
@@ -103,7 +103,7 @@
     <value type="QString" >XDG_CONFIG_HOME=/home/dsh/.config</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/share:/usr/local/share:/usr/share:/usr/local/share</value>
     <value type="QString" >XDG_DATA_HOME=/home/dsh/.local/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=1fac5d0108c66f1c17ef14d74a0700d8-1252077976.315085-210560909</value>
+    <value type="QString" >XDG_SESSION_COOKIE=1fac5d0108c66f1c17ef14d74a0700d8-1252261747.212725-1157828606</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
    </valuelist>
    <valuelist key="abstractProcess.arguments" type="QVariantList" >

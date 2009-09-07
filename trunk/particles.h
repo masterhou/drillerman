@@ -10,6 +10,7 @@
 #define PF_GRAVITY_AFFECTED     16
 #define PF_LEAVE_TRAIL          32
 #define PF_STOP_ON_DISTANCE     64
+#define PF_BLINKING             128
 
 
 typedef struct
@@ -52,5 +53,6 @@ Particle *particlesClone(Particle *particle);
 void particlesSetTimeout(Particle *particle, float timeout);
 void particlesSetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival);
 void particlesFrame(float lag);
+void particlesSetBlinking(Particle *particle, float frequency);
 
 #endif

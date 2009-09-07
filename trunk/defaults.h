@@ -60,7 +60,7 @@
 
 #define _AIR_DEST_X 700.0
 #define _AIR_DEST_Y 200.0
-#define _AIR_FLY_SPEED 600.0
+#define _AIR_FLY_SPEED 800.0
 #define _AIR_ROT_SPEED 720.0
 #define _AIR_TRAIL_SPACING 20.0
 

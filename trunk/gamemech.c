@@ -357,7 +357,7 @@ static void collectItems()
         particlesSetDestination(p, point(_AIR_DEST_X, _AIR_DEST_Y), _AIR_FLY_SPEED, true, false);
 
         particlesSetTrail(p, _AIR_TRAIL_SPACING, p->fadeSpeed);
-        p->fadeSpeed /= 2.5;
+        p->fadeSpeed /= 3.0;
         p->rotateSpeed = _AIR_ROT_SPEED;
         itemSprite->layer++;
     }

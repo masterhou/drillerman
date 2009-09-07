@@ -109,6 +109,12 @@ void particlesSetTimeout(Particle *particle, float timeout)
     particle->timer = 0;
 }
 
+void particlesSetBlinking(Particle *particle, float frequency)
+{
+    particle->flags |= PF_BLINKING;
+    particle->fadeSpeed = 1.0 / frequency;
+}
+
 void particlesSetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival)
 {
     particle->distance = 0.0;
@@ -163,6 +169,29 @@ void particlesFrame(float lag)
     {
         Particle *p = particles[i];
 
+        if(p->rotateSpeed != 0.0)
+            p->sprite->angle += lag * p->rotateSpeed;
+
+        if(p->fadeSpeed != 0.0)
+        {
+            p->sprite->opacity -= p->fadeSpeed * lag;
+
+            if(p->flags & PF_BLINKING)
+            {
+                if(p->sprite->opacity <= 0)
+                {
+                    p->sprite->opacity = -p->sprite->opacity;
+                    p->fadeSpeed = -p->fadeSpeed;
+                }
+
+                if(p->sprite->opacity >= 1.0)
+                {
+                    p->sprite->opacity = 2.0 - p->sprite->opacity;
+                    p->fadeSpeed = -p->fadeSpeed;
+                }
+            }
+        }
+
         if(p->flags & PF_GRAVITY_AFFECTED)
         {
             p->vy += _PARTICLE_ENGINE_GRAVITY * lag;
@@ -212,16 +241,12 @@ void particlesFrame(float lag)
 
         if(p->flags & PF_DESTROY_ON_FADEOUT)
         {
-            p->sprite->opacity -= p->fadeSpeed * lag;
             if(p->sprite->opacity <= 0.0)
             {
                 p->sprite->opacity = 0.0;
                 p->destroyScheduled = true;
             }
         }
-
-        if(p->rotateSpeed != 0.0)
-            p->sprite->angle += lag * p->rotateSpeed;
 
         if(p->destroyScheduled)
         {
