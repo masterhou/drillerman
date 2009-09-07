@@ -37,7 +37,10 @@
 #define _MAP_OFFSET_X 0.0
 #define _MAP_OFFSET_Y 300.0
 
+/* how many bricks merged together
+   causes them to explode on fall */
 #define _DESTROY_SIZE_THRESHOLD 4
+#define _DESTROY_BLINK_FREQUENCY 5.0
 
 #define _BRICK_FALL_DELAY 4.0
 
@@ -45,6 +48,8 @@
 
 #define _PARTICLE_ENGINE_CAPACITY_OVERHEAD 10
 #define _PARTICLE_ENGINE_GRAVITY 400.0
+
+#define _SPRITE_ENGINE_CAPACITY_OVERHEAD 10
 
 #define _HIT_PARTICLE_FALL_SPEED 200.0
 #define _HIT_PARTICLE_COUNT 10

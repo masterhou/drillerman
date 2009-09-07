@@ -144,6 +144,7 @@ void mainloopGo()
         particlesFrame(lag);
         procFade(lag);
 
+        sngeCleanupSprites();
         sngeDraw();
 
         if(inputKeyState[SDLK_ESCAPE] || inputQuit) done = 1;
