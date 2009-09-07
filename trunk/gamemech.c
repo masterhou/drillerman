@@ -64,7 +64,7 @@ static inline bool hitField(int x, int y)
 
     if(ft < VF_BRICK_COUNT)
     {
-        gameMapDestroyBrick(x, y);
+        gameMapDestroyBrick(x, y, false);
         return true;
     }
 
@@ -86,7 +86,6 @@ static void addHitParticles(int x, int y, Direction hitDirection)
                              (float)directionDelta[hitDirection][1] * _HIT_PARTICLE_FALL_SPEED * (commonRandD() - 0.5),
                              -(float)directionDelta[hitDirection][1] * _HIT_PARTICLE_FALL_SPEED * commonRandD() +
                              (float)directionDelta[hitDirection][0] * _HIT_PARTICLE_FALL_SPEED * (commonRandD() - 0.5), true);
-
         particlesSetFading(p, _HIT_PARTICLE_FADE_SPEED, true);
     }
 }

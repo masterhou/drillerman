@@ -40,7 +40,8 @@
 /* how many bricks merged together
    causes them to explode on fall */
 #define _DESTROY_SIZE_THRESHOLD 4
-#define _DESTROY_BLINK_FREQUENCY 5.0
+#define _DESTROY_BLINK_FREQUENCY 16.0
+#define _BLINK_TIME_BEFORE_DESTROY 0.25
 
 #define _BRICK_FALL_DELAY 4.0
 

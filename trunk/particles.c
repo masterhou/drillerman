@@ -71,7 +71,7 @@ void particlesSetFading(Particle *particle, float fadeSpeed, bool destroyOnFadeO
     particle->fadeSpeed = fadeSpeed;
 
     if(destroyOnFadeOut)
-        particle->flags |= PF_DESTROY_ON_FADEOUT;
+        particlesSetFlag(particle, PF_DESTROY_ON_FADEOUT);
 }
 
 void particlesSetVelocity(Particle *particle, float vx, float vy, bool affectedGravity)
@@ -80,7 +80,7 @@ void particlesSetVelocity(Particle *particle, float vx, float vy, bool affectedG
     particle->vy = vy;
 
     if(affectedGravity)
-        particle->flags |= PF_GRAVITY_AFFECTED;
+       particlesSetFlag(particle, PF_GRAVITY_AFFECTED);
 }
 
 inline void particlesSetVelocityDegrees(Particle *particle, float angleDeg, float speed, bool affectedGravity)
@@ -91,13 +91,13 @@ inline void particlesSetVelocityDegrees(Particle *particle, float angleDeg, floa
 
 void particlesSetDestroyDistance(Particle *particle, float destroyDistance)
 {
-    particle->flags |= PF_DESTROY_ON_DISTANCE;
+    particlesSetFlag(particle,  PF_DESTROY_ON_DISTANCE);
     particle->distanceLimit = destroyDistance;
 }
 
 void particlesSetTrail(Particle *particle, float trailSpacing, float trailFadeSpeed)
 {
-    particle->flags |= PF_LEAVE_TRAIL;
+    particlesSetFlag(particle,  PF_LEAVE_TRAIL);
     particle->oldTrailDistance = particle->distance;
     particle->trailSpacing = trailSpacing;
     particle->trailFadeSpeed = trailFadeSpeed;
@@ -105,14 +105,14 @@ void particlesSetTrail(Particle *particle, float trailSpacing, float trailFadeSp
 
 void particlesSetTimeout(Particle *particle, float timeout)
 {
-    particle->flags |= PF_DESTROY_ON_TIMEOUT;
+    particlesSetFlag(particle, PF_DESTROY_ON_TIMEOUT);
     particle->timer = 0;
 }
 
 void particlesSetBlinking(Particle *particle, float frequency)
 {
-    particle->flags |= PF_BLINKING;
-    particle->fadeSpeed = 1.0 / frequency;
+    particlesSetFlag(particle, PF_BLINKING);
+    particle->fadeSpeed = frequency;
 }
 
 void particlesSetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival)
@@ -128,9 +128,9 @@ void particlesSetDestination(Particle *particle, Point destination, float speed,
     particle->vy = (dy / particle->distanceLimit) * speed;
 
     if(destroyOnArrival)
-        particle->flags |= PF_DESTROY_ON_DISTANCE;
+        particlesSetFlag(particle, PF_DESTROY_ON_DISTANCE);
     else
-        particle->flags |= PF_STOP_ON_DISTANCE;
+        particlesSetFlag(particle, PF_STOP_ON_DISTANCE);
     
     if(fadeOut)
     {
@@ -142,7 +142,7 @@ void particlesSetDestination(Particle *particle, Point destination, float speed,
 
 inline void particlesDestroyOnAnimationEnd(Particle *particle)
 {
-    particle->flags |= PF_DESTROY_ON_ANIM_END;
+    particlesSetFlag(particle, PF_DESTROY_ON_ANIM_END);
 }
 
 Particle *particlesClone(Particle *particle)
@@ -298,9 +298,9 @@ void particlesFrame(float lag)
                 np->sprite->animdir = 0;
                 np->rotateSpeed = 0.0;
                 np->fadeSpeed = p->trailFadeSpeed;
-                np->flags &= ~PF_LEAVE_TRAIL;
-                np->flags &= ~PF_GRAVITY_AFFECTED;
-                np->flags |= PF_DESTROY_ON_FADEOUT;
+                particlesUnsetFlag(np, PF_LEAVE_TRAIL);
+                particlesUnsetFlag(np, PF_GRAVITY_AFFECTED);
+                particlesSetFlag(np, PF_DESTROY_ON_FADEOUT);
 
                 if(newcount == capacity)
                 {
