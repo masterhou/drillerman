@@ -14,6 +14,9 @@
 #define PF_BLINKING             128
 #define PF_DESTROY_ON_ANIM_END  256
 
+#define particlesSetFlag(__pparticle, __flag) __pparticle->flags |= __flag
+#define particlesUnsetFlag(__pparticle, __flag) __pparticle->flags &= ~__flag
+
 typedef struct
 {
     Sprite *sprite;

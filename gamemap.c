@@ -8,7 +8,6 @@
 #include "sprites.h"
 #include "brickshape.h"
 #include "stack.h"
-#include "particles.h"
 
 typedef struct
 {
@@ -362,6 +361,8 @@ static void findFallingBricks()
 
     stackClear(&bodyStack);
 
+    /* set not supported bricks shaking */
+
     for(y = 0; y < mapHeight; ++y)
         for(x = 0; x < mapWidth; ++x)
             map[x][y].checked = false;
@@ -458,12 +459,24 @@ static void destroyFallen()
 
             if(f->justhit && VF_DOES_MERGE(f->type) && f->state == FS_NORM && !f->checked)
                 if(bodySize(x, y) >= _DESTROY_SIZE_THRESHOLD)
-                    gameMapDestroyBrick(x, y);
+                    gameMapDestroyBrick(x, y, true);
         }
 }
+static void setBrickDestroying(MapField *field, int x, int y)
+{
+    if(field->particle == NULL)
+        field->particle = particlesAdd(field->sprite);
 
+    field->sprite->sclass = scidDestroyAnim[field->type];
+    field->sprite->frame = 0;
+    particlesDestroyOnAnimationEnd(field->particle);
+    addDestroyParticles(x, y);
+    field->sprite = NULL;
+    field->state = FS_VANISH;
+    field->type = VF_NONE;
+}
 
-void gameMapDestroyBrick(int x, int y)
+void gameMapDestroyBrick(int x, int y, bool blink)
 {
     Stack bodyStack = stackAlloc(sizeof(PointI), 5);
     PointI p = {x: x, y: y};
@@ -476,22 +489,22 @@ void gameMapDestroyBrick(int x, int y)
         MapField *field = &map[bp.x][bp.y];
         FieldType type = field->type;
 
-        if(field->state == FS_VANISH)
+        if(blink ? field->state == FS_BLINK : field->state == FS_VANISH)
             continue;
 
         if(field->sprite != NULL)
         {
-            field->sprite->sclass = scidDestroyAnim[field->type];
-            field->sprite->frame = 0;
-            Particle *p = particlesAdd(field->sprite);
-            particlesDestroyOnAnimationEnd(p);
+            field->particle = particlesAdd(field->sprite);
 
-            field->sprite = NULL;
-            addDestroyParticles(bp.x, bp.y);
+            if(blink)
+            {
+                particlesSetBlinking(field->particle, _DESTROY_BLINK_FREQUENCY);
+                field->timer = 0;
+                field->state = FS_BLINK;
+            }
+            else
+                setBrickDestroying(field, bp.x, bp.y);
         }
-
-        field->state = FS_VANISH;
-        field->type = VF_NONE;
 
         if(!VF_DOES_MERGE(type))
             continue;
@@ -565,6 +578,7 @@ void gameMapInit(int height, Difficulty difficulty)
             map[x][y].type = tmp[x][y];
             map[x][y].shift = point(0, 0);
             map[x][y].state = FS_NORM;
+            map[x][y].particle = NULL;
             map[x][y].justhit = false;
         }
 
@@ -619,10 +633,22 @@ void gameMapFrame(float lag)
             if(f->sprite == NULL)
                 continue;
 
+            if(f->state == FS_BLINK)
+            {
+                f->timer += lag;
+                if(f->timer >= _BLINK_TIME_BEFORE_DESTROY)
+                {
+                    particlesUnsetFlag(f->particle, PF_BLINKING);
+                    setBrickDestroying(f, x, y);
+                    f->particle = NULL;
+                }
+            }
+
+
             if(f->state == FS_SHAKE)
             {
-                f->shift.x += (float)f->shakedir * fallDelta;
                 f->timer += lag;
+                f->shift.x += (float)f->shakedir * fallDelta;
 
                 if(f->shift.x < -_SHAKE_MAX_SHIFT)
                 {
