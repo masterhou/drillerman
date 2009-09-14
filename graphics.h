@@ -7,6 +7,7 @@
 typedef enum
 {
     OT_SDLOPENGL,
+    OT_SDLOPENGLVBO,
     OT_LAST
 } OutType;
 
