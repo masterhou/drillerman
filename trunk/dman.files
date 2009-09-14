@@ -42,4 +42,6 @@ gamebcg.c
 gamebcg.h
 particles.c
 particles.h
+glesout.c
+glesout.h
 Makefile

@@ -175,11 +175,6 @@ void particlesFrame(float lag)
     {
         Particle *p = particles[i];
 
-        if(p->flags & PF_DESTROY_ON_ANIM_END && p->sprite->aended)
-        {
-            p->destroyScheduled = true;
-        }
-
         /* If something outside the particle
            engine wants it destroyed. We have
            to do it here because the sprite
@@ -189,6 +184,11 @@ void particlesFrame(float lag)
             p->sprite->destroy = true;
             free(p);
             continue;
+        }
+
+        if(p->flags & PF_DESTROY_ON_ANIM_END && p->sprite->aended)
+        {
+            p->destroyScheduled = true;
         }
 
         if(p->rotateSpeed != 0.0)

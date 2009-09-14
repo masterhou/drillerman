@@ -4,10 +4,11 @@
 #include <string.h>
 
 #include "glout.h"
+#include "glesout.h"
 
 #include "message.h"
 
-OutType outType = OT_SDLOPENGL;
+OutType outType = OT_SDLOPENGLVBO;
 
 typedef struct
 {
@@ -36,7 +37,20 @@ OutFuncs outFuncs[OT_LAST] = {
         drawRectangle: &gloutDrawRectangle,
         blitPartBitmap: &gloutBlitPartBitmap,
         blitText: &gloutBlitText
+    },
+    {
+        loadBitmap: &glesoutLoadBitmap,
+        initSubsystem: &glesoutInitSubsystem,
+        blitBitmap: &glesoutBlitBitmap,
+        setBackground: &glesoutSetBackground,
+        clearBuffer: &glesoutClearBuffer,
+        blitBuffer: &glesoutBlitBuffer,
+        setFadeColor: &glesoutSetFadeColor,
+        drawRectangle: &glesoutDrawRectangle,
+        blitPartBitmap: &glesoutBlitPartBitmap,
+        blitText: &glesoutBlitText
     }
+
 };
 
 void graphicsInitSubsytem(int screen_width, int screen_height)
