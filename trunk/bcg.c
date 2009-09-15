@@ -3,26 +3,15 @@
 #include <stdlib.h>
 
 #include "sprites.h"
-#include "snge.h"
 
-typedef struct
-{
-    SpriteClassId scid;
-    Sprite **sprites;
-    int count;
-    int bottom;
-    float height;
-} GameBcgLayer;
-
-GameBcgLayer layers[_BCG_LAYER_COUNT];
-
-void bcg_Init()
+Bcg bcg_Create(float vShift, int levelNum)
 {
     int i, j;
+    Bcg bcg;
 
     for(i = 0; i < _BCG_LAYER_COUNT; ++i)
     {
-        SpriteClassId scid = sprites_GetIdByNameF("level_0:bcg-layer-%d", i);
+        SpriteClassId scid = sprites_GetIdByNameF("level_%d:bcg-layer-%d", levelNum, i);
         
         int width;
         int height;
@@ -30,35 +19,36 @@ void bcg_Init()
         sprites_GetDimensions(scid, &width, &height);
 
         int xpos = (_ACTION_AREA_WIDTH - width) / 2;
-
         int count = (_SCREEN_HEIGHT / height) + 2;
+
         Sprite **sprites = malloc(sizeof(Sprite*) * count);
 
         for(j = 0; j < count; ++j)
         {
-            sprites[j] = snge_AddSprite(scid, point(xpos, (j - 1) * height), i);
+            sprites[j] = snge_AddSprite(scid, point(xpos, (j - 1) * height + vShift), i);
             sprites[j]->relative = true;
         }
 
-        layers[i].bottom = count - 1;
-        layers[i].sprites = sprites;
-        layers[i].count = count;
-        layers[i].height = (float)height;
+        bcg.layers[i].bottom = count - 1;
+        bcg.layers[i].sprites = sprites;
+        bcg.layers[i].count = count;
+        bcg.layers[i].height = (float)height;
     }
+
+    return bcg;
 }
 
-void bcg_Move(float vdelta)
+void bcg_Move(Bcg *pBcg, float vdelta)
 {
     int i, j;
 
     for(i = 0; i < _BCG_LAYER_COUNT; ++i)
     {
-        GameBcgLayer *l = &layers[i];
+        BcgLayer *l = &pBcg->layers[i];
         float pfactor = 1.0 - ((float)(_BCG_LAYER_COUNT - i) * _BCG_PARALLAX_FACTOR);
 
         for(j = 0; j < l->count; ++j)
             l->sprites[j]->y += vdelta * pfactor;
-
 
         float bottomy = l->sprites[l->bottom]->y + l->height;
 
@@ -72,14 +62,14 @@ void bcg_Move(float vdelta)
 
 }
 
-void bcg_Cleanup()
+void bcg_Cleanup(Bcg *pBcg)
 {
     int i, j;
     for(i = 0; i < _BCG_LAYER_COUNT; ++i)
     {
-        for(j = 0; j < layers[i].count; ++j)
-            layers[i].sprites[j]->destroy = true;
+        for(j = 0; j < pBcg->layers[i].count; ++j)
+            pBcg->layers[i].sprites[j]->destroy = true;
 
-        free(layers[i].sprites);
+        free(pBcg->layers[i].sprites);
     }
 }

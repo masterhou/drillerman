@@ -11,7 +11,7 @@
 #include "snge.h"
 #include "particles.h"
 
-static int mapHeight = 150;
+static int mapHeight = 35;
 
 static void loadLevelSpriteClasses(int levelNum);
 
