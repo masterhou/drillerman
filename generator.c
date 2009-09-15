@@ -13,7 +13,18 @@ typedef struct
 } GenerationParams;
 
 
-static GenerationParams gps[DF_LAST] = {
+static GenerationParams gps[_LEVEL_COUNT] = {
+    {
+        airPeriodMin: 6,
+        airPeriodMax: 10,
+        airCratedProbability: {
+                {0.1, 0.2, 0.1},
+                {0.3, 0.0, 0.3},
+                {0.1, 0.3, 0.1}
+            },
+        sameColorFactor: 1.0,
+        colorProbability: {0.4, 0.3, 0.2, 0.1}
+    },
     {
         airPeriodMin: 6,
         airPeriodMax: 10,
@@ -28,17 +39,17 @@ static GenerationParams gps[DF_LAST] = {
 };
 
 
-void generatorAllocMap(FieldType ***pmap, int height, Difficulty difficulty)
+void generator_AllocMap(FieldType ***pmap, int height, int level)
 {
     int i, j, x, y;
 
     FieldType **map;
-    GenerationParams gp = gps[difficulty];
+    GenerationParams gp = gps[level];
     int width = _MAP_WIDTH;
 
     srand(time(NULL));
 
-    map = (FieldType **)commonAlloc2DTable(width, height, sizeof(FieldType));
+    map = (FieldType **)common_Alloc2DTable(width, height, sizeof(FieldType));
 
     for(y = 0; y < height; ++y)
         for(x = 0; x < width; ++x)
@@ -48,7 +59,7 @@ void generatorAllocMap(FieldType ***pmap, int height, Difficulty difficulty)
         for(x = 0; x < width; ++x)
             do
             {
-        FieldType vf = commonRandI() % VF_BRICK_COUNT;
+        FieldType vf = common_RandI() % VF_BRICK_COUNT;
 
         int is_there = 0;
 
@@ -61,9 +72,9 @@ void generatorAllocMap(FieldType ***pmap, int height, Difficulty difficulty)
 
         map[x][y] = vf;
 
-        if(is_there && commonRandD() >= gp.sameColorFactor)
+        if(is_there && common_RandD() >= gp.sameColorFactor)
             map[x][y] = VF_NONE;
-        if(commonRandD() >= gp.colorProbability[vf])
+        if(common_RandD() >= gp.colorProbability[vf])
             map[x][y] = VF_NONE;
 
     } while(map[x][y] == VF_NONE);
@@ -72,15 +83,15 @@ void generatorAllocMap(FieldType ***pmap, int height, Difficulty difficulty)
 
     while(y < height)
     {
-        x = commonRandI() % width;
+        x = common_RandI() % width;
         map[x][y] = VF_AIR;
 
         for(j = -1; j <= 1; ++j)
             for(i = -1; i <= 1; ++i)
                 if(INBOUND(x + i, y + j, width, height) &&
-                   commonRandD() < gp.airCratedProbability[j + 1][i + 1])
+                   common_RandD() < gp.airCratedProbability[j + 1][i + 1])
                     map[x + i][y + j] = VF_CRATE;
-        y += (commonRandI() % (gp.airPeriodMax - gp.airPeriodMin + 1)) + gp.airPeriodMin;
+        y += (common_RandI() % (gp.airPeriodMax - gp.airPeriodMin + 1)) + gp.airPeriodMin;
     }
 
     *pmap = map;
@@ -88,10 +99,10 @@ void generatorAllocMap(FieldType ***pmap, int height, Difficulty difficulty)
 
 }
 
-void generatorFreeMap(FieldType ***map, int height)
+void generator_FreeMap(FieldType ***map)
 {
-    commonFree2DTable((void**)*map, height);
-    map = NULL;
+    common_Free2DTable((void**)*map, _MAP_WIDTH);
+    *map = NULL;
 }
 
 

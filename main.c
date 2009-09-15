@@ -29,22 +29,22 @@ static void readConfiguration()
 
     char resolution[256];
 
-    cfgOpen(path);
+    cfg_Open(path);
 
-    cfgSeekSection("graphics");
-    cfgGetIntValue("fullscreen", &enableFullscreen);
-    cfgGetIntValue("filtering", &filteringType);
-    cfgGetStringValue("resolution", resolution);
+    cfg_SeekSection("graphics");
+    cfg_GetIntValue("fullscreen", &enableFullscreen);
+    cfg_GetIntValue("filtering", &filteringType);
+    cfg_GetStringValue("resolution", resolution);
 
 
     sscanf(resolution, "%dx%d", &screenWidth, &screenHeight);
 
-    cfgClose();
+    cfg_Close();
 }
 
 int main(int argc, char **argv)
 {
-    messageOutEx("Data path is set to '%s'\n", _DATA_PATH);
+    message_OutEx("Data path is set to '%s'\n", _DATA_PATH);
 
     xScrRatio = (float)screenWidth / (float)_SCREEN_WIDTH;
     yScrRatio = (float)screenHeight / (float)_SCREEN_HEIGHT;
@@ -54,28 +54,28 @@ int main(int argc, char **argv)
     SDL_Surface* screen;
 
     if(SDL_Init(SDL_INIT_VIDEO) < 0)
-        messageCriticalError("Could not initialize SDL video.\n");
+        message_CriticalError("Could not initialize SDL video.\n");
 
     atexit(SDL_Quit);
 
     if(!(screen = SDL_SetVideoMode(screenWidth, screenHeight, 32, SDL_OPENGL | (enableFullscreen ? SDL_FULLSCREEN : 0))))
-        messageCriticalError("Could not set desired video mode.\n");
+        message_CriticalError("Could not set desired video mode.\n");
 
     SDL_WM_SetCaption("D-Man", NULL);
 
     graphicsInitSubsytem(_SCREEN_WIDTH, _SCREEN_HEIGHT);
-    inputInit();
-    spritesInit();
-    sngeInit();
-    particlesInit();
+    input_Init();
+    sprites_Init();
+    snge_Init();
+    particles_Init();
 
-    mainloopGo();
+    mainloop_Go();
 
-    particlesCleanup();
-    spritesFreeAll();
-    sngeFreeSprites();
+    particles_Cleanup();
+    sprites_FreeAll();
+    snge_FreeSprites();
 
-    messageOut("Goodbye.\n");
+    message_Out("Goodbye.\n");
 
     return EXIT_SUCCESS;
 }

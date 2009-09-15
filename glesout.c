@@ -53,7 +53,7 @@ static int queryExtenstion(char *extName)
         int n = strcspn(p, " ");
         if ((extNameLen == n) && (strncmp(extName, p, n) == 0))
         {
-            messageOutEx("Found extenstion '%s'.\n", extName);
+            message_OutEx("Found extenstion '%s'.\n", extName);
             return 1;
         }
 
@@ -85,12 +85,12 @@ void glesoutInitSubsystem(int screen_width, int screen_height)
 
     if(!extGL_ARB_NPOT && extGL_ARB_TEX_RECT)
     {
-        messageWarning("Extension 'GL_ARB_texture_non_power_of_two' not found.\n");
-        messageWarning("Using 'GL_ARB_texture_rectangle' instead.\n");
+        message_Warning("Extension 'GL_ARB_texture_non_power_of_two' not found.\n");
+        message_Warning("Using 'GL_ARB_texture_rectangle' instead.\n");
     }
 
     if(!extGL_ARB_NPOT && !extGL_ARB_TEX_RECT)
-        messageCriticalError("No extensions allowing non-power of two textures found.\nGo buy a new graphics card.\n");
+        message_CriticalError("No extensions allowing non-power of two textures found.\nGo buy a new graphics card.\n");
 
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -175,7 +175,7 @@ BitmapId glesoutLoadBitmap(const char* file, int *w, int *h)
 
     if(!surface)
     {
-        messageCriticalErrorEx("SDL Error: '%s'\n", SDL_GetError());
+        message_CriticalErrorEx("SDL Error: '%s'\n", SDL_GetError());
         return 0;
     }
 

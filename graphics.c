@@ -8,7 +8,7 @@
 
 #include "message.h"
 
-OutType outType = OT_SDLOPENGLVBO;
+OutType outType = OT_SDLOPENGL;
 
 typedef struct
 {

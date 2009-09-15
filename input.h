@@ -3,10 +3,16 @@
 
 #include <SDL/SDL_keysym.h>
 
-extern unsigned char inputKeyState[SDLK_LAST + 1];
-extern unsigned char inputQuit;
+#include "common.h"
 
-void inputPumpEvents();
-void inputInit();
+typedef enum {KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_DRILL, KEY_EXIT, KEY_COUNT} Key;
+
+void input_PumpEvents();
+void input_Init();
+bool input_IsDirPressed(Direction dir);
+bool input_IsKeyPressed(Key key);
+void input_UnsetPressed(Key key);
+bool input_WantQuit();
+
 
 #endif

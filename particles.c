@@ -13,26 +13,8 @@ static int count;
 static int capacity;
 static const int overhead = _PARTICLE_ENGINE_CAPACITY_OVERHEAD;
 
-void particlesInit()
-{
-    count = 0;
-    capacity = overhead;
-    particles = malloc(sizeof(Particle*) * capacity);
-}
-
-void particlesCleanup()
-{
-    int i;
-    for(i = 0; i < count; ++i)
-        free(particles[i]);
-
-    free(particles);
-}
-
-void particlesRemoveAll()
-{
-    count = 0;
-}
+static inline Particle *allocParticle();
+static inline void pushParticle(Particle *particle);
 
 static inline void pushParticle(Particle *particle)
 {
@@ -53,7 +35,29 @@ static inline Particle *allocParticle()
     return p;
 }
 
-Particle *particlesAdd(Sprite *sprite)
+
+void particles_Init()
+{
+    count = 0;
+    capacity = overhead;
+    particles = malloc(sizeof(Particle*) * capacity);
+}
+
+void particles_Cleanup()
+{
+    int i;
+    for(i = 0; i < count; ++i)
+        free(particles[i]);
+
+    free(particles);
+}
+
+void particles_RemoveAll()
+{
+    count = 0;
+}
+
+Particle *particles_Add(Sprite *sprite)
 {
     if(sprite == NULL)
         return NULL;
@@ -69,56 +73,56 @@ Particle *particlesAdd(Sprite *sprite)
     return p;
 }
 
-void particlesSetFading(Particle *particle, float fadeSpeed, bool destroyOnFadeOut)
+void particles_SetFading(Particle *particle, float fadeSpeed, bool destroyOnFadeOut)
 {
     particle->fadeSpeed = fadeSpeed;
 
     if(destroyOnFadeOut)
-        particlesSetFlag(particle, PF_DESTROY_ON_FADEOUT);
+        particles_SetFlag(particle, PF_DESTROY_ON_FADEOUT);
 }
 
-void particlesSetVelocity(Particle *particle, float vx, float vy, bool affectedGravity)
+void particles_SetVelocity(Particle *particle, float vx, float vy, bool affectedGravity)
 {
     particle->vx = vx;
     particle->vy = vy;
 
     if(affectedGravity)
-       particlesSetFlag(particle, PF_GRAVITY_AFFECTED);
+       particles_SetFlag(particle, PF_GRAVITY_AFFECTED);
 }
 
-inline void particlesSetVelocityDegrees(Particle *particle, float angleDeg, float speed, bool affectedGravity)
+inline void particles_SetVelocityDegrees(Particle *particle, float angleDeg, float speed, bool affectedGravity)
 {
     float rad = DEG_TO_RAD(angleDeg);
-    particlesSetVelocity(particle, cosf(rad) * speed, sinf(rad) * speed, affectedGravity);
+    particles_SetVelocity(particle, cosf(rad) * speed, sinf(rad) * speed, affectedGravity);
 }
 
-void particlesSetDestroyDistance(Particle *particle, float destroyDistance)
+void particles_SetDestroyDistance(Particle *particle, float destroyDistance)
 {
-    particlesSetFlag(particle,  PF_DESTROY_ON_DISTANCE);
+    particles_SetFlag(particle,  PF_DESTROY_ON_DISTANCE);
     particle->distanceLimit = destroyDistance;
 }
 
-void particlesSetTrail(Particle *particle, float trailSpacing, float trailFadeSpeed)
+void particles_SetTrail(Particle *particle, float trailSpacing, float trailFadeSpeed)
 {
-    particlesSetFlag(particle,  PF_LEAVE_TRAIL);
+    particles_SetFlag(particle,  PF_LEAVE_TRAIL);
     particle->oldTrailDistance = particle->distance;
     particle->trailSpacing = trailSpacing;
     particle->trailFadeSpeed = trailFadeSpeed;
 }
 
-void particlesSetTimeout(Particle *particle, float timeout)
+void particles_SetTimeout(Particle *particle, float timeout)
 {
-    particlesSetFlag(particle, PF_DESTROY_ON_TIMEOUT);
+    particles_SetFlag(particle, PF_DESTROY_ON_TIMEOUT);
     particle->timer = 0;
 }
 
-void particlesSetBlinking(Particle *particle, float frequency)
+void particles_SetBlinking(Particle *particle, float frequency)
 {
-    particlesSetFlag(particle, PF_BLINKING);
+    particles_SetFlag(particle, PF_BLINKING);
     particle->fadeSpeed = frequency;
 }
 
-void particlesSetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival)
+void particles_SetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival)
 {
     particle->distance = 0.0;
 
@@ -131,28 +135,28 @@ void particlesSetDestination(Particle *particle, Point destination, float speed,
     particle->vy = (dy / particle->distanceLimit) * speed;
 
     if(destroyOnArrival)
-        particlesSetFlag(particle, PF_DESTROY_ON_DISTANCE);
+        particles_SetFlag(particle, PF_DESTROY_ON_DISTANCE);
     else
-        particlesSetFlag(particle, PF_STOP_ON_DISTANCE);
+        particles_SetFlag(particle, PF_STOP_ON_DISTANCE);
     
     if(fadeOut)
     {
         float fadeSpeed = particle->sprite->opacity / (particle->distanceLimit / speed);
-        particlesSetFading(particle, fadeSpeed, true);
+        particles_SetFading(particle, fadeSpeed, true);
     }
 
 }
 
-inline void particlesDestroyOnAnimationEnd(Particle *particle)
+inline void particles_DestroyOnAnimationEnd(Particle *particle)
 {
-    particlesSetFlag(particle, PF_DESTROY_ON_ANIM_END);
+    particles_SetFlag(particle, PF_DESTROY_ON_ANIM_END);
 }
 
-Particle *particlesClone(Particle *particle)
+Particle *particles_Clone(Particle *particle)
 {
     Point p;
 
-    Sprite *ns = sngeAddSprite(0, p, 0);
+    Sprite *ns = snge_AddSprite(0, p, 0);
 
     memcpy(ns, particle->sprite, sizeof(Sprite));
 
@@ -164,7 +168,7 @@ Particle *particlesClone(Particle *particle)
     return np;
 }
 
-void particlesFrame(float lag)
+void particles_Frame(float lag)
 {
     int i;
 
@@ -292,7 +296,7 @@ void particlesFrame(float lag)
 
             if(dd >= p->trailSpacing)
             {
-                Particle *np = particlesClone(p);
+                Particle *np = particles_Clone(p);
 
                 p->oldTrailDistance = p->distance - dd + p->trailSpacing;
 
@@ -301,9 +305,9 @@ void particlesFrame(float lag)
                 np->sprite->animdir = 0;
                 np->rotateSpeed = 0.0;
                 np->fadeSpeed = p->trailFadeSpeed;
-                particlesUnsetFlag(np, PF_LEAVE_TRAIL);
-                particlesUnsetFlag(np, PF_GRAVITY_AFFECTED);
-                particlesSetFlag(np, PF_DESTROY_ON_FADEOUT);
+                particles_UnsetFlag(np, PF_LEAVE_TRAIL);
+                particles_UnsetFlag(np, PF_GRAVITY_AFFECTED);
+                particles_SetFlag(np, PF_DESTROY_ON_FADEOUT);
 
                 if(newcount == capacity)
                 {

@@ -11,8 +11,8 @@ typedef enum
     SCR_NONE
 } ScreenId;
 
-void mainloopChangeScr(ScreenId newscr, void *data);
-void mainloopChangeScrWithFade(ScreenId newscr, void *data, float duration);
-void mainloopGo();
+void mainloop_ChangeScr(ScreenId newscr, void *data);
+void mainloop_ChangeScrWithFade(ScreenId newscr, void *data, float duration);
+void mainloop_Go();
 
 #endif

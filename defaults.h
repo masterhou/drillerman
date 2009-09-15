@@ -1,6 +1,8 @@
 #ifndef DEFAULTS_H
 #define DAFAULTS_H
 
+#define _STR_BUFLEN 256
+
 #define _SCREEN_WIDTH 800
 #define _SCREEN_HEIGHT 600
 
@@ -9,6 +11,8 @@
 
 #define _BRICK_WIDTH 60
 #define _BRICK_HEIGHT 60
+
+#define _LEVEL_COUNT 1
 
 #define _ACTION_AREA_WIDTH (_MAP_WIDTH * _BRICK_WIDTH)
 #define _VISIBLE_ROWS (_SCREEN_HEIGHT / _BRICK_HEIGHT)

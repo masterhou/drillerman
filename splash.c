@@ -11,19 +11,19 @@ static float dx, dy, sx, sy;
 static int go;
 static int finished;
 
-void splashInit(void *data)
+void splash_Init(void *data)
 {
 
+    int w, h;
     go = 1;
 
-    SpriteClassId logoc = spritesGetIdByName("logobig");
-    int w = spritesClasses[logoc].frame[0].w;
-    int h = spritesClasses[logoc].frame[0].h;
+    SpriteClassId logoc = sprites_GetIdByName("logobig");
+    sprites_GetDimensions(logoc, &w, &h);
     sx = -w;
     sy = -h;
 
-    sngeAddSprite(spritesGetIdByName("splash"), point(0, 0), 0);
-    logo = sngeAddSprite(logoc, point(sx, sy), 1);
+    snge_AddSprite(sprites_GetIdByName("splash"), point(0, 0), 0);
+    logo = snge_AddSprite(logoc, point(sx, sy), 1);
 
     dx = (_SCREEN_WIDTH - w) / 2;
     dy = (_SCREEN_HEIGHT- h) / 2;
@@ -34,7 +34,7 @@ void splashInit(void *data)
 }	
 
 
-int splashFrame(float lag)
+int splash_Frame(float lag)
 {
     if(!finished)
     {
@@ -54,7 +54,7 @@ int splashFrame(float lag)
 
         if(!go && logo->angle < (lag * 360.0))
         {
-            mainloopChangeScrWithFade(SCR_MENU, NULL, 0.5);
+            mainloop_ChangeScrWithFade(SCR_MENU, NULL, 0.5);
             finished = 1;
         }
     }
@@ -62,7 +62,7 @@ int splashFrame(float lag)
     return 0;
 }
 
-void splashCleanup()
+void splash_Cleanup()
 {
-    sngeFreeSprites();
+    snge_FreeSprites();
 }

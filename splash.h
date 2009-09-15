@@ -2,9 +2,9 @@
 #define SPLASH_H
 
 
-void splashInit(void *data);
-int splashFrame(float lag);
-void splashCleanup();
+void splash_Init(void *data);
+int splash_Frame(float lag);
+void splash_Cleanup();
 
 
 #endif

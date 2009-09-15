@@ -3,9 +3,9 @@
 
 typedef unsigned short int TimerHandle;
 
-void timerProcessTimers(float lag);
-void timerCleanTimers();
-TimerHandle timerAddTimer(float interval, int oneshot);
-int timerFired(TimerHandle handle);
+void timer_ProcessTimers(float lag);
+void timer_CleanTimers();
+TimerHandle timer_AddTimer(float interval, int oneshot);
+int timer_Fired(TimerHandle handle);
 
 #endif

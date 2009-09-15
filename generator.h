@@ -20,7 +20,8 @@ typedef enum
 
 #define VF_DOES_MERGE(FTYPE) ((FTYPE) < VF_BRICK_COUNT || (FTYPE == VF_CRATE))
 
-void generatorAllocMap(FieldType ***pmap, int height, Difficulty difficulty);
+void generator_AllocMap(FieldType ***pmap, int height, int level);
+void generator_FreeMap(FieldType ***map);
 
 
 #endif

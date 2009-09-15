@@ -14,8 +14,8 @@
 #define PF_BLINKING             128
 #define PF_DESTROY_ON_ANIM_END  256
 
-#define particlesSetFlag(__pparticle, __flag) __pparticle->flags |= __flag
-#define particlesUnsetFlag(__pparticle, __flag) __pparticle->flags &= ~__flag
+#define particles_SetFlag(__pparticle, __flag) __pparticle->flags |= __flag
+#define particles_UnsetFlag(__pparticle, __flag) __pparticle->flags &= ~__flag
 
 typedef struct
 {
@@ -43,21 +43,21 @@ typedef struct
 /*
     Cleaning up particle engine does not remove any sprites!
 */
-void particlesInit();
-void particlesCleanup();
+void particles_Init();
+void particles_Cleanup();
 
-Particle *particlesAdd(Sprite *sprite);
+Particle *particles_Add(Sprite *sprite);
 
-void particlesSetFading(Particle *particle, float fadeSpeed, bool destroyOnFadeOut);
-void particlesSetVelocity(Particle *particle, float vx, float vy, bool affectedGravity);
-inline void particlesSetVelocityDegrees(Particle *particle, float angleDeg, float speed, bool affectedGravity);
-void particlesSetDestroyDistance(Particle *particle, float destroyDistance);
-void particlesSetTrail(Particle *particle, float trailSpacing, float trailFadeSpeed);
-Particle *particlesClone(Particle *particle);
-void particlesSetTimeout(Particle *particle, float timeout);
-void particlesSetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival);
-void particlesFrame(float lag);
-void particlesSetBlinking(Particle *particle, float frequency);
-void particlesDestroyOnAnimationEnd(Particle *particle);
+void particles_SetFading(Particle *particle, float fadeSpeed, bool destroyOnFadeOut);
+void particles_SetVelocity(Particle *particle, float vx, float vy, bool affectedGravity);
+inline void particles_SetVelocityDegrees(Particle *particle, float angleDeg, float speed, bool affectedGravity);
+void particles_SetDestroyDistance(Particle *particle, float destroyDistance);
+void particles_SetTrail(Particle *particle, float trailSpacing, float trailFadeSpeed);
+Particle *particles_Clone(Particle *particle);
+void particles_SetTimeout(Particle *particle, float timeout);
+void particles_SetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival);
+void particles_Frame(float lag);
+void particles_SetBlinking(Particle *particle, float frequency);
+void particles_DestroyOnAnimationEnd(Particle *particle);
 
 #endif
