@@ -50,23 +50,6 @@ typedef struct
     SpriteClassId destroyParticle[_DESTROY_PARTICLE_TYPE_COUNT];
 } LevelSpriteClasses;
 
-static MapField **cMap;
-static MapField ***maps;
-static int mapHeight;
-static int mapWidth = _MAP_WIDTH;
-
-static InterField **interArea = NULL;
-
-static LevelSpriteClasses *cScids;
-static LevelSpriteClasses **scids;
-
-static Stack bodyStack;
-static Stack mainStack;
-static Stack timerStack;
-static Stack shiftStack;
-
-static bool needShapeUpdate;
-
 static void generateMaps();
 static void loadScids();
 static void addDestroyParticles(float x, float y);
@@ -85,9 +68,70 @@ static void interAreaCleanup();
 static void interAreaFrame(float lag);
 static void interAreaHit(int x, int y);
 
+static MapField **cMap;
+static MapField ***maps;
+static int mapHeight;
+static int mapWidth = _MAP_WIDTH;
+
+static InterField **interArea = NULL;
+
+static LevelSpriteClasses *cScids;
+static LevelSpriteClasses **scids;
+
+static Stack bodyStack;
+static Stack mainStack;
+static Stack timerStack;
+static Stack shiftStack;
+
+static bool needShapeUpdate;
+
 void level_Advance(int hitx, int nextLevel)
 {
     interAreaHit(hitx, 0);
+
+    int x, y;
+
+    int visibleCutoff = mapHeight - _VISIBLE_ROWS;
+
+    for(x = 0; x < mapWidth; ++x)
+        for(y = 0; y < visibleCutoff; ++y)
+            if(cMap[x][y].sprite != NULL || cMap[x][y].type != VF_NONE)
+            {
+                cMap[x][y].sprite->destroy = true;
+                cMap[x][y].type = VF_NONE;
+                cMap[x][y].sprite = NULL;
+            }
+
+
+    for(x = 0; x < mapWidth; ++x)
+        for(y = visibleCutoff; y < mapHeight; ++y)
+        {
+            MapField *f = &cMap[x][y];
+
+            if(f->sprite != NULL || f->type != VF_NONE)
+            {
+                Particle *p;
+
+                if(f->state == FS_BLINK && f->particle != NULL)
+                {
+                    p = f->particle;
+                    p->flags = 0;
+                }
+                else
+                    p = particles_Add(f->sprite);
+
+                particles_SetFading(p, _LEVEL_ADVANCE_FADE_SPEED, true);
+
+                f->type = VF_NONE;
+                f->sprite = NULL;
+            }
+        }
+
+    //cMap = maps[nextLevel];
+    //cScids = scids[nextLevel];
+
+
+
 }
 
 static void interAreaAllocate(float vShift)
@@ -116,7 +160,7 @@ static void interAreaAllocate(float vShift)
 
 static inline void interAreaHit(int x, int y)
 {
-    if(x < 0 || y < 0 || x >= _MAP_WIDTH || y >= _INTER_ROW_COUNT)
+    if(x < 0 || y < 0 || x >= _MAP_WIDTH || y >= _INTER_ROW_COUNT || interArea == NULL)
         return;
 
     InterField *f = &interArea[x][y];

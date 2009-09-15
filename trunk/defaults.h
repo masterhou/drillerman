@@ -12,7 +12,7 @@
 #define _BRICK_WIDTH 60
 #define _BRICK_HEIGHT 60
 
-#define _LEVEL_COUNT 1
+#define _LEVEL_COUNT 2
 
 #define _ACTION_AREA_WIDTH (_MAP_WIDTH * _BRICK_WIDTH)
 #define _VISIBLE_ROWS (_SCREEN_HEIGHT / _BRICK_HEIGHT)
@@ -78,6 +78,8 @@
 #define _INTER_FADE_SPEED 2.0
 #define _INTER_LAYER 10
 #define _INTER_BLOW_DELAY 0.2
+
+#define _LEVEL_ADVANCE_FADE_SPEED 2.0
 
 #ifndef _DATA_PATH 
 #define _DATA_PATH "./data/"

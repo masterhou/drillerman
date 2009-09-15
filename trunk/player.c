@@ -220,7 +220,7 @@ static void updatePlayerPosition(float lag)
 
     if(input_IsKeyPressed(KEY_DRILL))
     {
-        if(vy == (mapHeight - 1) && voff == 0.0)
+        if(vy == (mapHeight - 1) && voff == 0.0 && playerDirection == DIR_DOWN)
             advanceLevel(vx);
 
         animationSet = true;
