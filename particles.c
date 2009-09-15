@@ -277,7 +277,6 @@ void particles_Frame(float lag)
         if(p->destroyScheduled)
         {
             p->sprite->destroy = true;
-            free(p);
         }
         else
         {
@@ -320,6 +319,9 @@ void particles_Frame(float lag)
             }
         }
 
+        if(p->destroyScheduled)
+        /* Finally we can free particles from current table. */
+            free(p);
     }
 
     free(particles);

@@ -1,0 +1,13 @@
+[bcg-layer-2]
+frames=1
+frame(1)=bcglayer1.png
+
+[bcg-layer-1]
+frames=1
+frame(1)=bcglayer2.png
+
+[bcg-layer-0]
+frames=1
+frame(1)=bcglayer3.png
+
+
