@@ -32,9 +32,19 @@ typedef struct
 
 typedef struct
 {
+    bool hit;
+    bool destroyed;
+    Sprite *sprite;
+    Particle *particle;
+    float timer;
+} InterField;
+
+typedef struct
+{
     SpriteClassId air;
     SpriteClassId crate;
     SpriteClassId crateHit[4];
+    SpriteClassId interBrick;
     SpriteClassId bricks[VF_BRICK_COUNT][_BRICK_TYPE_COUNT];
     SpriteClassId destroyAnim[VF_LAST];
     SpriteClassId destroyParticle[_DESTROY_PARTICLE_TYPE_COUNT];
@@ -44,6 +54,8 @@ static MapField **cMap;
 static MapField ***maps;
 static int mapHeight;
 static int mapWidth = _MAP_WIDTH;
+
+static InterField **interArea = NULL;
 
 static LevelSpriteClasses *cScids;
 static LevelSpriteClasses **scids;
@@ -57,7 +69,7 @@ static bool needShapeUpdate;
 
 static void generateMaps();
 static void loadScids();
-static void addDestroyParticles(int x, int y);
+static void addDestroyParticles(float x, float y);
 static void updateBrickShape(MapField **cMap, const LevelSpriteClasses *pScids);
 static void allocSprites(MapField **cMap, LevelSpriteClasses *pScids, float vertShift);
 static float getShakeShift(int y);
@@ -68,6 +80,105 @@ static void unsetShake();
 static int bodySize(int x, int y);
 static void destroyFallen();
 static void setBrickDestroying(MapField *field, int x, int y);
+static void interAreaAllocate(float vShift);
+static void interAreaCleanup();
+static void interAreaFrame(float lag);
+static void interAreaHit(int x, int y);
+
+void level_Advance(int hitx, int nextLevel)
+{
+    interAreaHit(hitx, 0);
+}
+
+static void interAreaAllocate(float vShift)
+{
+    interArea = (InterField**)common_Alloc2DTable(_MAP_WIDTH, _INTER_ROW_COUNT, sizeof(InterField));
+
+    vShift += (float)mapHeight * (float)_BRICK_HEIGHT;
+
+    int x, y;
+
+    for(x = 0; x < _MAP_WIDTH; ++x)
+    {
+        float xpos = (float)_BRICK_WIDTH * (float)x;
+        float ypos = vShift;
+
+        for(y = 0; y < _INTER_ROW_COUNT; ++y)
+        {
+            interArea[x][y].hit = false;
+            interArea[x][y].sprite = snge_AddSprite(cScids->interBrick, point(xpos, ypos), _INTER_LAYER);
+            interArea[x][y].timer = 0.0;
+            interArea[x][y].destroyed = false;
+            ypos += (float)_BRICK_HEIGHT;
+        }
+    }
+}
+
+static inline void interAreaHit(int x, int y)
+{
+    if(x < 0 || y < 0 || x >= _MAP_WIDTH || y >= _INTER_ROW_COUNT)
+        return;
+
+    InterField *f = &interArea[x][y];
+
+    if(f->destroyed || f->hit)
+        return;
+
+    f->hit = true;
+
+    f->particle = particles_Add(f->sprite);
+    particles_SetFading(f->particle, _INTER_FADE_SPEED, true);
+
+    addDestroyParticles(f->sprite->x + (float)_BRICK_WIDTH / 2.0,
+                        f->sprite->y + (float)_BRICK_HEIGHT / 2.0);
+    f->sprite = NULL;
+}
+
+
+static void interAreaFrame(float lag)
+{
+    if(interArea == NULL)
+        return;
+
+    int x, y;
+    bool done = true;
+
+    for(x = 0; x < _MAP_WIDTH; ++x)
+        for(y = 0; y < _INTER_ROW_COUNT; ++y)
+        {
+            InterField *f = &interArea[x][y];
+
+            if(!f->destroyed)
+                done = false;
+
+            if(!f->hit || f->destroyed)
+                continue;
+
+            done = false;
+
+            f->timer += lag;
+
+            if(f->timer >= _INTER_BLOW_DELAY)
+            {
+                f->destroyed = true;
+                interAreaHit(x - 1, y);
+                interAreaHit(x + 1, y);
+                interAreaHit(x, y + 1);
+            }
+        }
+
+    /* Automatic cleaning up.
+       If every brick is either hit or destroyed
+       there is nothing left to do... */
+    if(done)
+        interAreaCleanup();
+}
+
+static void interAreaCleanup()
+{
+    common_Free2DTable((void**)interArea, _MAP_WIDTH);
+    interArea = NULL;
+}
 
 static void generateMaps()
 {
@@ -144,6 +255,7 @@ static void loadScids()
 
         pscids->air = sprites_GetIdByName("level_common:air");
         pscids->crate = sprites_GetIdByName("level_common:crate");
+        pscids->interBrick = sprites_GetIdByName("level_common:brick-inter");
 
         for(j = 0; j < 4; ++j)
             pscids->crateHit[j] = sprites_GetIdByNameF("level_common:crate_hit_%d", j + 1);
@@ -170,10 +282,9 @@ static void loadScids()
     cScids = scids[0];
 }
 
-static void addDestroyParticles(int x, int y)
+static void addDestroyParticles(float x, float y)
 {
-    Point p = {x: x * _BRICK_WIDTH + _BRICK_WIDTH / 2,
-               y: y * _BRICK_HEIGHT + _BRICK_HEIGHT / 2};
+    Point p = {x: x, y: y};
     int i;
 
     for(i = 0; i < _DESTROY_PARTICLE_COUNT; ++i)
@@ -565,7 +676,8 @@ static void setBrickDestroying(MapField *field, int x, int y)
     field->sprite->sclass = cScids->destroyAnim[field->type];
     field->sprite->frame = 0;
     particles_DestroyOnAnimationEnd(field->particle);
-    addDestroyParticles(x, y);
+    addDestroyParticles(field->sprite->x + (float)_BRICK_WIDTH / 2.0,
+                        field->sprite->y + (float)_BRICK_HEIGHT / 2.0);
     field->sprite = NULL;
     field->state = FS_VANISH;
     field->type = VF_NONE;
@@ -690,6 +802,7 @@ void level_Frame(float lag)
     updateFallingUponShakingBricks();
     destroyFallen();
 
+    interAreaFrame(lag);
 
     for(y = mapHeight - 1; y >= 0; --y)
         for(x = 0; x < mapWidth; ++x)
@@ -808,6 +921,7 @@ void level_Init(int levelHeight)
     generateMaps();
 
     allocSprites(cMap, cScids, 0.0);
+    interAreaAllocate(0.0);
 }
 
 void level_Cleanup()

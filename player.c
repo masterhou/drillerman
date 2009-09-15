@@ -39,6 +39,11 @@ static float goingUpShift;
 static Direction goingUpDirection;
 static TimerHandle goingUpTimer;
 
+static Bcg bcg;
+static Bcg bcgNext;
+
+static int level;
+
 static inline void changePlayerAnimation(SpriteClassId scid)
 {
     if(player->sclass == scid)
@@ -88,6 +93,12 @@ static void addHitParticles(int x, int y, Direction hitDirection)
                              (float)directionDelta[hitDirection][0] * _HIT_PARTICLE_FALL_SPEED * (common_RandD() - 0.5), true);
         particles_SetFading(p, _HIT_PARTICLE_FADE_SPEED, true);
     }
+}
+
+static void advanceLevel(int hitx)
+{
+    level++;
+    level_Advance(hitx, level);
 }
 
 static void updatePlayerPosition(float lag)
@@ -209,6 +220,9 @@ static void updatePlayerPosition(float lag)
 
     if(input_IsKeyPressed(KEY_DRILL))
     {
+        if(vy == (mapHeight - 1) && voff == 0.0)
+            advanceLevel(vx);
+
         animationSet = true;
         changePlayerAnimation(scidPlayerDrill[playerDirection]);
 
@@ -310,8 +324,9 @@ static void updatePlayerPosition(float lag)
 void player_Init(int levelHeight)
 {
     mapHeight = levelHeight;
+    level = 0;
 
-    bcg_Init();
+    bcg = bcg_Create(0, 0);
     level_Init(mapHeight);
 
     int i;
@@ -371,7 +386,7 @@ void player_Frame(float lag)
     viewportPos.x = - _MAP_OFFSET_X;
     viewportPos.y = - _MAP_OFFSET_Y + playerPos.y - goingUpShift;
 
-    bcg_Move(oldy - viewportPos.y);
+    bcg_Move(&bcg, oldy - viewportPos.y);
 
     snge_MoveViewport(viewportPos);
 
@@ -381,6 +396,6 @@ void player_Frame(float lag)
 
 void player_Cleanup()
 {
+    bcg_Cleanup(&bcg);
     level_Cleanup();
-    bcg_Cleanup();
 }

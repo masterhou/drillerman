@@ -14,6 +14,7 @@ void level_Cleanup();
 void level_DestroyBrick(int x, int y, bool blink);
 FieldType level_GetFieldType(int x, int y);
 bool level_IsAirGetAir(int x, int y, Sprite **psprite);
-bool level_HitCrate(int x, int y);
+bool level_HitCrate(int x, int y);\
+void level_Advance(int hitx, int nextLevel);
 
 #endif

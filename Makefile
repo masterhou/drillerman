@@ -1,5 +1,5 @@
 CC		= gcc
-CFLAGS		= -O0 -Wall -pipe -g -m32
+CFLAGS		= -O0 -Wall -pipe -g 
 #CFLAGS = -O3 -pipe -fomit-frame-pointer
 #-D_DATA_PATH=\"${DAT_DIR}\" 
 LDFLAGS		= -lSDL -lGL -lGLU -lSDL_image -lm

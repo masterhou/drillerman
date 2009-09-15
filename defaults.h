@@ -74,6 +74,11 @@
 #define _AIR_ROT_SPEED 720.0
 #define _AIR_TRAIL_SPACING 50.0
 
+#define _INTER_ROW_COUNT ((_SCREEN_HEIGHT / _BRICK_HEIGHT) / 2 + 1)
+#define _INTER_FADE_SPEED 2.0
+#define _INTER_LAYER 10
+#define _INTER_BLOW_DELAY 0.2
+
 #ifndef _DATA_PATH 
 #define _DATA_PATH "./data/"
 #endif
