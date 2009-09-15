@@ -1,0 +1,7 @@
+[font:base]
+font=yes
+char_width=45
+char_height=60
+char_string=abcdefghijklmnopqrstuvwxyz.:,!?"+-=
+image=base.png
+
