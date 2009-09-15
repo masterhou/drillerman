@@ -37,47 +37,11 @@ static void *fadeIntoScrData;
 
 static ScreenId scr = SCR_NONE;
 static ScreenFuncs scrFuncs[SCR_LAST] =	{
-    {init: &exitInit, cleanup: &exitCleanup, frame: &exitFrame},
-    {init: &splashInit, cleanup: &splashCleanup, frame: &splashFrame},
-    {init: &menuInit, cleanup: &menuCleanup, frame: &menuFrame},
-    {init: &gameInit, cleanup: &gameCleanup, frame: &gameFrame}
+    {init: &exit_Init, cleanup: &exit_Cleanup, frame: &exit_Frame},
+    {init: &splash_Init, cleanup: &splash_Cleanup, frame: &splash_Frame},
+    {init: &menu_Init, cleanup: &menu_Cleanup, frame: &menu_Frame},
+    {init: &game_Init, cleanup: &game_Cleanup, frame: &game_Frame}
 };
-
-static float getFps(float lag)
-{
-    fps[fpsItem] = 1.0 / lag;
-    fpsItem++;
-    fpsItem %= _FPS_ITEM_COUNT;
-
-    int i;
-    float cfps = 0.0f;
-
-    for(i = 0; i < _FPS_ITEM_COUNT; ++i)
-        cfps += fps[i] / (float)_FPS_ITEM_COUNT;
-
-    if(fpsItem == 0)
-        messageOutEx("FPS: %f\n", cfps);
-
-    return cfps;
-}
-
-void mainloopChangeScr(ScreenId newscr, void *data)
-{
-    if(scr != SCR_NONE)
-        scrFuncs[scr].cleanup();
-    scr = newscr;
-    scrFuncs[scr].init(data);
-}
-
-void mainloopChangeScrWithFade(ScreenId newscr, void *data, float duration)
-{
-    fadeIntoScr = newscr;
-    fadeIntoScrData = data;
-    fadeDuration = duration;
-
-    fadeStatus = FS_FADEOUT;
-    fadeAmount = 0.0;
-}
 
 static void procFade(float lag)
 {
@@ -87,7 +51,7 @@ static void procFade(float lag)
 
         if(fadeAmount > 1.0)
         {
-            mainloopChangeScr(fadeIntoScr, fadeIntoScrData);
+            mainloop_ChangeScr(fadeIntoScr, fadeIntoScrData);
             fadeStatus = FS_FADEIN;
             fadeAmount = 1.0;
         }
@@ -111,14 +75,51 @@ static void procFade(float lag)
 
 }
 
-void mainloopGo()
+static float getFps(float lag)
+{
+    fps[fpsItem] = 1.0 / lag;
+    fpsItem++;
+    fpsItem %= _FPS_ITEM_COUNT;
+
+    int i;
+    float cfps = 0.0f;
+
+    for(i = 0; i < _FPS_ITEM_COUNT; ++i)
+        cfps += fps[i] / (float)_FPS_ITEM_COUNT;
+
+    if(fpsItem == 0)
+        message_OutEx("FPS: %f\n", cfps);
+
+    return cfps;
+}
+
+void mainloop_ChangeScr(ScreenId newscr, void *data)
+{
+    if(scr != SCR_NONE)
+        scrFuncs[scr].cleanup();
+    scr = newscr;
+    scrFuncs[scr].init(data);
+}
+
+void mainloop_ChangeScrWithFade(ScreenId newscr, void *data, float duration)
+{
+    fadeIntoScr = newscr;
+    fadeIntoScrData = data;
+    fadeDuration = duration;
+
+    fadeStatus = FS_FADEOUT;
+    fadeAmount = 0.0;
+}
+
+
+void mainloop_Go()
 {
 
-    int done = 0;
+    bool done = 0;
     double lag = 0;
     Uint32 oldticks = 0;
 
-    mainloopChangeScr(SCR_GAME, NULL);
+    mainloop_ChangeScr(SCR_GAME, NULL);
 
     fadeDuration = 1.5;
     fadeAmount = 1.0;
@@ -133,25 +134,26 @@ void mainloopGo()
 
         graphicsClearBuffer();
 
-        inputPumpEvents();
-        sngeUpdateAnim(lag);
+        input_PumpEvents();
+        snge_UpdateAnim(lag);
 
-        timerProcessTimers(lag);
+        timer_ProcessTimers(lag);
 
         if(scrFuncs[scr].frame(lag))
             done = 1;
 
-        particlesFrame(lag);
+        particles_Frame(lag);
         procFade(lag);
 
-        sngeCleanupSprites();
-        sngeDraw();
+        snge_CleanupSprites();
+        snge_Draw();
 
-        if(inputKeyState[SDLK_ESCAPE] || inputQuit) done = 1;
+        if(input_IsKeyPressed(KEY_EXIT) || input_WantQuit())
+            done = true;
 
         graphicsBlitBuffer();
 
-        timerCleanTimers();
+        timer_CleanTimers();
         SDL_Delay(10);
     }
 

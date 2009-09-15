@@ -20,11 +20,11 @@ OBJECTS		= main.o \
 		glout.o \
 		game.o \
 		generator.o \
-		gamemap.o \
-                gamemech.o \
+                level.o \
+                player.o \
                 timer.o \
                 stack.o \
-                gamebcg.o \
+                bcg.o \
                 particles.o \
                 glesout.o
 			

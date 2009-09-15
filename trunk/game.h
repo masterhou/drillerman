@@ -1,9 +1,9 @@
 #ifndef GAME_H
 #define GAME_H
 
-void gameInit(void *data);
-int gameFrame(float lag);
-void gameCleanup();
+void game_Init(void *data);
+int game_Frame(float lag);
+void game_Cleanup();
 
 
 #endif

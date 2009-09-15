@@ -36,15 +36,15 @@ typedef struct
 
 } Sprite;
 
-void sngeInit();
-Sprite *sngeAddSprite(SpriteClassId sprclass, Point pos, int layer);
-inline Sprite *sngeAddFontSprite(SpriteClassId fontclass, Point pos, int layer, char *string);
-void sngeFreeSprites();
-void sngeUpdateAnim(float lag);
-void sngeDraw();
-Point sngeGetTextSize(Sprite *psprite);
-void sngeMoveViewport(Point newpos);
-void sngeRelativizeSprite(Sprite *sprite);
-void sngeCleanupSprites();
+void snge_Init();
+Sprite *snge_AddSprite(SpriteClassId sprclass, Point pos, int layer);
+inline Sprite *snge_AddFontSprite(SpriteClassId fontclass, Point pos, int layer, char *string);
+void snge_FreeSprites();
+void snge_UpdateAnim(float lag);
+void snge_Draw();
+Point snge_GetTextSize(Sprite *psprite);
+void snge_MoveViewport(Point newpos);
+void snge_RelativizeSprite(Sprite *sprite);
+void snge_CleanupSprites();
 
 #endif

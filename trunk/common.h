@@ -58,24 +58,17 @@ typedef struct
     char hflip;
 } Transformations;
 
-typedef enum
-{
-    DF_EASY,
-    DF_MEDIUM,
-    DF_HARD,
-    DF_HARDCORE,
-    DF_LAST
-} Difficulty;
+typedef enum {DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN, DIR_COUNT, DIR_NONE} Direction;
 
 Point point(float x, float y);
 Color color(float r, float g, float b, float a);
 
-void commonGetBasePath(const char *input, char *output);
-double commonRandD();
-int commonRandI();
+void common_GetBasePath(const char *input, char *output);
+double common_RandD();
+int common_RandI();
 
-void commonFree2DTable(void **table, int w);
-void **commonAlloc2DTable(int w, int h, unsigned int elsz);
+void common_Free2DTable(void **table, int w);
+void **common_Alloc2DTable(int w, int h, unsigned int elsz);
 
 #endif
 

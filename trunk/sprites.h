@@ -32,20 +32,19 @@ typedef struct
 
 } SpriteClass;
 
-void spritesInit();
+void sprites_Init();
 
-SpriteClassId spritesGetIdByName(const char *name);
-SpriteClassId spritesGetIdByNameF(const char *namefmt, ...);
+SpriteClassId sprites_GetIdByName(const char *name);
+SpriteClassId sprites_GetIdByNameF(const char *namefmt, ...);
 
-void spritesLoadFromCfg(const char *cfgpathrel);
-void spritesLoadFromCfgF(const char *cfgpathrelfmt, ...);
+void sprites_LoadFromCfg(const char *cfgpathrel, const char *namePrefix);
+void sprites_LoadFromCfgF(const char *cfgpathrelfmt, const char *namePrefix, ...);
 
-void spritesLoadFontsFromCfg(char *cfgpathrel);
-void spritesFreeAll();
+void sprites_LoadFontsFromCfg(char *cfgpathrel);
+void sprites_FreeAll();
 
-void spritesGetDimensions(SpriteClassId id, int *width, int *height);
-
-extern SpriteClass *spritesClasses;
+void sprites_GetDimensions(SpriteClassId id, int *width, int *height);
+SpriteClass* sprites_GetClass(SpriteClassId id);
 
 
 #endif

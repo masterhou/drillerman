@@ -63,20 +63,14 @@ static void procStars(float lag)
 
 static void procMenu(float lag)
 {
-    if(inputKeyState[SDLK_LEFT])
-        ;
-
-    if(inputKeyState[SDLK_RIGHT])
-        ;
-
         menuEntries[ME_EXIT]->angle += lag * 50.0;
 }
 
-void menuInit(void *data)
+void menu_Init(void *data)
 {
 
-    spritesLoadFromCfg("sprites/menu.spr");
-    spritesLoadFontsFromCfg("fonts/fonts.desc");
+    sprites_LoadFromCfg("sprites/menu.spr", "");
+    sprites_LoadFontsFromCfg("fonts/fonts.desc");
 
     menuEntry = ME_EXIT;
 
@@ -84,45 +78,34 @@ void menuInit(void *data)
 
     graphicsSetBackground(FT_FLAT, color(0.3, 0.59, 1.0, 1), color(0, 0, 0, 0), GT_NONE);
 
-    sngeAddSprite(spritesGetIdByName("menu_logo"), point(100, 25), 5);
+    snge_AddSprite(sprites_GetIdByName("menu_logo"), point(100, 25), 5);
 
-    SpriteClassId starc = spritesGetIdByName("star");
+    SpriteClassId starc = sprites_GetIdByName("star");
 
     int i;
 
     for(i = 0; i < STAR_COUNT; ++i)
-        stars[i] = sngeAddSprite(starc, point(-500, -500), -1);
+        stars[i] = snge_AddSprite(starc, point(-500, -500), -1);
 
-    starw = spritesClasses[starc].frame[0].w;
-    starh = spritesClasses[starc].frame[0].h;
+    sprites_GetDimensions(starc, &starw, &starh);
 
-    menuEntries[ME_ARCADE] = sngeAddFontSprite(spritesGetIdByName("font:base"), point(0, 0), 2, "arcade");
-    menuEntries[ME_SURVIVAL] = sngeAddFontSprite(spritesGetIdByName("font:base"), point(0, 70), 2, "survival");
-    menuEntries[ME_HOF] = sngeAddFontSprite(spritesGetIdByName("font:base"), point(0, 140), 2, "hall of fame");
-    menuEntries[ME_EXIT] = sngeAddFontSprite(spritesGetIdByName("font:base"), point(0, 210), 2, "exit");
+    menuEntries[ME_ARCADE] = snge_AddFontSprite(sprites_GetIdByName("font:base"), point(0, 0), 2, "arcade");
+    menuEntries[ME_SURVIVAL] = snge_AddFontSprite(sprites_GetIdByName("font:base"), point(0, 70), 2, "survival");
+    menuEntries[ME_HOF] = snge_AddFontSprite(sprites_GetIdByName("font:base"), point(0, 140), 2, "hall of fame");
+    menuEntries[ME_EXIT] = snge_AddFontSprite(sprites_GetIdByName("font:base"), point(0, 210), 2, "exit");
 }
 
-int menuFrame(float lag)
+int menu_Frame(float lag)
 {
     procStars(lag);
     procMenu(lag);
 
-    if(inputKeyState[SDLK_SPACE])
-    {
-        inputKeyState[SDLK_SPACE] = 0;
-        switch(menuEntry)
-        {
-            case ME_EXIT: return 1; break;
-            default:  break;
-        }
-    }
-
     return 0;
 }
 
-void menuCleanup()
+void menu_Cleanup()
 {
-    sngeFreeSprites();
-    spritesFreeAll();
+    snge_FreeSprites();
+    sprites_FreeAll();
 }
 

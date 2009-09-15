@@ -19,7 +19,7 @@ static int capacity;
 static Sprite **sprites;
 static Point viewportPos;
 
-void sngeRelativizeSprite(Sprite *sprite)
+void snge_RelativizeSprite(Sprite *sprite)
 {
     if(sprite->relative)
         return;
@@ -53,7 +53,7 @@ static void sortByLayer()
 
 }
 
-void sngeInit()
+void snge_Init()
 {
     count = 0;
     capacity = _SPRITE_ENGINE_CAPACITY_OVERHEAD;
@@ -61,12 +61,12 @@ void sngeInit()
     viewportPos = point(0, 0);
 }
 
-void sngeMoveViewport(Point newpos)
+void snge_MoveViewport(Point newpos)
 {
     viewportPos = newpos;
 }
 
-Sprite *sngeAddSprite(SpriteClassId sprclass, Point pos, int layer)
+Sprite *snge_AddSprite(SpriteClassId sprclass, Point pos, int layer)
 {
     count++;
 
@@ -103,16 +103,16 @@ Sprite *sngeAddSprite(SpriteClassId sprclass, Point pos, int layer)
     return s;
 }
 
-inline Sprite *sngeAddFontSprite(SpriteClassId fontclass, Point pos, int layer, char *string)
+inline Sprite *snge_AddFontSprite(SpriteClassId fontclass, Point pos, int layer, char *string)
 {
-    Sprite *s = sngeAddSprite(fontclass, pos, layer);
+    Sprite *s = snge_AddSprite(fontclass, pos, layer);
     strcpy(s->text, string);
 
     return s;
 }
 
 
-void sngeFreeSprites()
+void snge_FreeSprites()
 {
     if(!sprites) return;
 
@@ -127,9 +127,9 @@ void sngeFreeSprites()
     sprites = NULL;
 }
 
-Point sngeGetTextSize(Sprite *psprite)
+Point snge_GetTextSize(Sprite *psprite)
 {
-    SpriteClass *sc = &spritesClasses[psprite->sclass];
+    SpriteClass *sc = sprites_GetClass(psprite->sclass);
     Point sz = {
         sc->font.char_width * strlen(psprite->text),
         sc->font.char_height
@@ -138,7 +138,7 @@ Point sngeGetTextSize(Sprite *psprite)
     return sz;
 }
 
-void sngeCleanupSprites()
+void snge_CleanupSprites()
 {
     Sprite **stmp = malloc(sizeof(Sprite*) * capacity);
     int scount = 0;
@@ -164,13 +164,13 @@ void sngeCleanupSprites()
     sprites = stmp;
 }
 
-void sngeUpdateAnim(float lag)
+void snge_UpdateAnim(float lag)
 {
     int i;
 
     for(i = 0; i < count; ++i)
     {
-        SpriteClass *sc = &spritesClasses[sprites[i]->sclass];
+        SpriteClass *sc = sprites_GetClass(sprites[i]->sclass);
         Sprite *sp = sprites[i];
 
         int fc = sc->fcount;
@@ -214,7 +214,7 @@ void sngeUpdateAnim(float lag)
     }
 }
 
-void sngeDraw()
+void snge_Draw()
 {
     sortByLayer();
 
@@ -225,7 +225,7 @@ void sngeDraw()
     {
         Sprite *s = sprites[i];
         SpriteClassId scid = s->sclass;
-        SpriteClass *sc = &spritesClasses[scid];
+        SpriteClass *sc = sprites_GetClass(scid);
 
         int frame = (int)floorf(s->frame);
 

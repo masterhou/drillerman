@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-void commonGetBasePath(const char *input, char *output)
+void common_GetBasePath(const char *input, char *output)
 {
 
 #ifndef WIN32
@@ -19,17 +19,17 @@ void commonGetBasePath(const char *input, char *output)
 
 }
 
-double commonRandD()
+double common_RandD()
 {
     return (double)rand() / (double)(RAND_MAX);
 }
 
-int commonRandI()
+int common_RandI()
 {
     return (double)rand() / (double)(RAND_MAX) * 100.0;
 }
 
-void **commonAlloc2DTable(int w, int h, unsigned int elsz)
+void **common_Alloc2DTable(int w, int h, unsigned int elsz)
 {
     int i;
     void **t;
@@ -42,7 +42,7 @@ void **commonAlloc2DTable(int w, int h, unsigned int elsz)
     return t;
 }
 
-void commonFree2DTable(void **table, int w)
+void common_Free2DTable(void **table, int w)
 {
     int i;
 

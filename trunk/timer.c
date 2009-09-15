@@ -25,7 +25,7 @@ static int timerCount = 0;
 static int maxHandle = 0;
 Timer **timers = NULL;
 
-void timerProcessTimers(float lag)
+void timer_ProcessTimers(float lag)
 {
     int i;
 
@@ -33,7 +33,7 @@ void timerProcessTimers(float lag)
         timers[i]->time += lag;
 }
 
-int timerFired(TimerHandle handle)
+int timer_Fired(TimerHandle handle)
 {
     int a, b, c, d = 0;
 
@@ -72,7 +72,7 @@ int timerFired(TimerHandle handle)
     return 0;
 }
 
-TimerHandle timerAddTimer(float interval, int oneshot)
+TimerHandle timer_AddTimer(float interval, int oneshot)
 {
     Timer *t = malloc(sizeof(Timer));
 
@@ -90,7 +90,7 @@ TimerHandle timerAddTimer(float interval, int oneshot)
     return t-> handle;
 }
 
-void timerCleanTimers()
+void timer_CleanTimers()
 {
     if(timerCount == 0)
         return;

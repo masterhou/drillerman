@@ -11,7 +11,7 @@
 #define colorGreen(s) fprintf(s, "\033[1;32m")
 #define colorEnd(s) fprintf(s, "\033[0m")
 
-void messageCriticalError(const char *msg)
+void message_CriticalError(const char *msg)
 {
 #ifdef __BASH_COLORS
     colorRed(stderr);
@@ -24,7 +24,7 @@ void messageCriticalError(const char *msg)
 #endif
 }
 
-void messageWarning(const char *msg)
+void message_Warning(const char *msg)
 {
 #ifdef __BASH_COLORS
     colorBlue(stderr);
@@ -36,7 +36,7 @@ void messageWarning(const char *msg)
 #endif
 }
 
-void messageCriticalErrorEx(const char *fmt, ...)
+void message_CriticalErrorEx(const char *fmt, ...)
 {
 #ifdef __BASH_COLORS
     colorRed(stderr);
@@ -52,7 +52,7 @@ void messageCriticalErrorEx(const char *fmt, ...)
 #endif
 }
 
-void messageWarningEx(const char *fmt, ...)
+void message_WarningEx(const char *fmt, ...)
 {
 #ifdef __BASH_COLORS
     colorBlue(stderr);
@@ -68,13 +68,13 @@ void messageWarningEx(const char *fmt, ...)
 #endif
 }
 
-void messageOut(const char *msg)
+void message_Out(const char *msg)
 {
     printf("M: ");
     printf(msg);
 }
 
-void messageOutEx(const char *fmt, ...)
+void message_OutEx(const char *fmt, ...)
 {
     printf("M: ");
     va_list args;
@@ -84,7 +84,7 @@ void messageOutEx(const char *fmt, ...)
     va_end(args);
 }
 
-void messageOutEmf(const char *msg)
+void message_OutEmf(const char *msg)
 {
 #ifdef __BASH_COLORS
     colorGreen(stdout);
@@ -96,7 +96,7 @@ void messageOutEmf(const char *msg)
 #endif
 }
 
-void messageOutEmfEx(const char *fmt, ...)
+void message_OutEmfEx(const char *fmt, ...)
 {
 #ifdef __BASH_COLORS
     colorGreen(stdout);

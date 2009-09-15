@@ -11,28 +11,28 @@
 #include "common.h"
 
 
-int spritesCCount;
-SpriteClass *spritesClasses;
+static int count;
+static SpriteClass *classes;
 
 static void incrementClassCount()
 {
-    spritesCCount++;
-    spritesClasses = realloc(spritesClasses, sizeof(SpriteClass) * spritesCCount);
+    count++;
+    classes = realloc(classes, sizeof(SpriteClass) * count);
 }
 
-void spritesGetDimensions(SpriteClassId id, int *width, int *height)
+void sprites_GetDimensions(SpriteClassId id, int *width, int *height)
 {
-    *width = spritesClasses[id].frame[0].w;
-    *height = spritesClasses[id].frame[0].h;
+    *width = classes[id].frame[0].w;
+    *height = classes[id].frame[0].h;
 }
 
-void spritesInit()
+void sprites_Init()
 {
-    spritesClasses = NULL;
-    spritesCCount = 0;
+    classes = NULL;
+    count = 0;
 }
 
-void spritesLoadFromCfg(const char *cfgpathrel)
+void sprites_LoadFromCfg(const char *cfgpathrel, const char *namePrefix)
 {
 
     extern char dataPath[];
@@ -42,7 +42,7 @@ void spritesLoadFromCfg(const char *cfgpathrel)
     strcat(path, dataPath);
     strcat(path, cfgpathrel);
 
-    cfgOpen(path);
+    cfg_Open(path);
 
     unsigned int totalsz = 0;
     int totalnum = 0;
@@ -50,39 +50,38 @@ void spritesLoadFromCfg(const char *cfgpathrel)
     char name[256];
     char sprpath[256];
 
-    commonGetBasePath(path, sprpath);
+    common_GetBasePath(path, sprpath);
 
-    while(cfgNextSection(name))
+    while(cfg_NextSection(name))
     {
-        messageOutEmfEx("Loading sprite class '%s'...\n", name);
-
         incrementClassCount();
+        int s = count - 1;
 
-        int s = spritesCCount - 1;
+        message_OutEmfEx("Loading sprite class '%s' id '%d'...\n", name, s);
 
-        SpriteClass *sc = &spritesClasses[s];
+        SpriteClass *sc = &classes[s];
 
-        sc->name = malloc(strlen(name) + 1);
-        sprintf(sc->name, "%s", name);
+        sc->name = malloc(strlen(name) + strlen(namePrefix) + 1);
+        sprintf(sc->name, "%s%s", namePrefix, name);
 
-        sc->areverse = cfgGetTag("reverse");
-        sc->arepeat = cfgGetTag("repeat");
+        message_OutEmfEx("Internal sprite class name: %s\n", sc->name);
 
-        cfgGetIntValue("frames", &sc->fcount);
+        sc->areverse = cfg_GetTag("reverse");
+        sc->arepeat = cfg_GetTag("repeat");
+
+        cfg_GetIntValue("frames", &sc->fcount);
 
         sc->ssc = SSC_STILL;
 
         if(sc->fcount > 1)
         {
-            cfgGetDoubleValue("speed", &sc->fps);
-            messageOutEx("\tHas %d frames.\n", sc->fcount);
-            messageOutEx("\tRuns at %2.2lf fps.\n", sc->fps);
+            cfg_GetDoubleValue("speed", &sc->fps);
+            message_OutEx("\tHas %d frames.\n", sc->fcount);
+            message_OutEx("\tRuns at %2.2lf fps.\n", sc->fps);
             sc->ssc = SSC_ANIM;
         }
 
-
         sc->frame = malloc(sizeof(SpriteFrame) * sc->fcount);
-
 
         int i;
 
@@ -96,16 +95,16 @@ void spritesLoadFromCfg(const char *cfgpathrel)
 
             sprintf(framestr, "frame(%d)", i + 1);
 
-            cfgGetStringValue(framestr, texfile);
+            cfg_GetStringValue(framestr, texfile);
 
             sprintf(texpath, "%s%s", sprpath, texfile);
 
             frame->image = graphicsLoadBitmap(texpath, &frame->w, &frame->h);
 
-            messageOutEx("\tLoading frame %2d : '%s' (%dx%d) ...\n", i + 1, texpath, frame->w, frame->h);
+            message_OutEx("\tLoading frame %2d : '%s' (%dx%d) ...\n", i + 1, texpath, frame->w, frame->h);
 
             if(!frame->image)
-                messageCriticalErrorEx("Could not load frame %d - '%s'.\n", i, texpath);
+                message_CriticalErrorEx("Could not load frame %d - '%s'.\n", i, texpath);
 
 
 
@@ -116,25 +115,30 @@ void spritesLoadFromCfg(const char *cfgpathrel)
 
     }
 
-    messageOutEx("Loaded %d bitmaps of approximate size of %.3lf MiB\n",
+    message_OutEx("Loaded %d bitmaps of approximate size of %.3lf MiB\n",
                  totalnum, (double)totalsz / (1024.0 * 1024.0));
 
-    cfgClose();
+    cfg_Close();
 }
 
-void spritesLoadFromCfgF(const char *cfgpathrelfmt, ...)
+inline SpriteClass* sprites_GetClass(SpriteClassId id)
+{
+    return &classes[id];
+}
+
+void sprites_LoadFromCfgF(const char *cfgpathrelfmt, const char *namePrefix, ...)
 {
     va_list args;
     char buf[1024];
 
-    va_start(args, cfgpathrelfmt);
+    va_start(args, namePrefix);
     vsnprintf(buf, sizeof(buf), cfgpathrelfmt, args);
     va_end(args);
 
-    spritesLoadFromCfg(buf);
+    sprites_LoadFromCfg(buf, namePrefix);
 }
 
-void spritesLoadFontsFromCfg(char *cfgpathrel)
+void sprites_LoadFontsFromCfg(char *cfgpathrel)
 {
     extern char dataPath[];
 
@@ -143,24 +147,24 @@ void spritesLoadFontsFromCfg(char *cfgpathrel)
     strcat(path, dataPath);
     strcat(path, cfgpathrel);
 
-    cfgOpen(path);
+    cfg_Open(path);
 
     char name[256];
     char imgpath[256];
     unsigned int totalsz = 0;
     int totalnum = 0;
 
-    commonGetBasePath(path, imgpath);
+    common_GetBasePath(path, imgpath);
 
-    while(cfgNextSection(name))
+    while(cfg_NextSection(name))
     {
-        messageOutEx("Loading sprite:font class '%s'...\n", name);
+        message_OutEx("Loading sprite:font class '%s'...\n", name);
 
         incrementClassCount();
 
-        int s = spritesCCount - 1;
+        int s = count - 1;
 
-        SpriteClass *sc = &spritesClasses[s];
+        SpriteClass *sc = &classes[s];
 
         sc->name = malloc(strlen(name) + 1);
 
@@ -173,49 +177,51 @@ void spritesLoadFontsFromCfg(char *cfgpathrel)
         char texfile[256];
         char texpath[256];
 
-        cfgGetIntValue("char_width", &sc->font.char_width);
-        cfgGetIntValue("char_height", &sc->font.char_height);
-        cfgGetStringValue("char_string", sc->font.char_string);
+        cfg_GetIntValue("char_width", &sc->font.char_width);
+        cfg_GetIntValue("char_height", &sc->font.char_height);
+        cfg_GetStringValue("char_string", sc->font.char_string);
 
-        messageOutEx("\tCharacter string: '%s'\n", sc->font.char_string);
-        messageOutEx("\tCharacter size: %dx%d\n", sc->font.char_width, sc->font.char_height);
+        message_OutEx("\tCharacter string: '%s'\n", sc->font.char_string);
+        message_OutEx("\tCharacter size: %dx%d\n", sc->font.char_width, sc->font.char_height);
 
-        cfgGetStringValue("image", texfile);
+        cfg_GetStringValue("image", texfile);
 
         sprintf(texpath, "%s%s", imgpath, texfile);
 
         sc->frame->image = graphicsLoadBitmap(texpath, &sc->frame->w, &sc->frame->h);
 
-        messageOutEx("\tLoading bmp font image: '%s' (%dx%d) ...\n", texpath, sc->frame->w, sc->frame->h);
+        message_OutEx("\tLoading bmp font image: '%s' (%dx%d) ...\n", texpath, sc->frame->w, sc->frame->h);
 
         if(!sc->frame->image)
-            messageCriticalErrorEx("Could not load font image '%s'.\n", texpath);
+            message_CriticalErrorEx("Could not load font image '%s'.\n", texpath);
 
         totalsz += sc->frame->w * sc->frame->h * 4;
         totalnum++;
 
     }
 
-    messageOutEx("Loaded %d bitmaps of approximate size of %.3lf MiB\n",
+    message_OutEx("Loaded %d bitmaps of approximate size of %.3lf MiB\n",
                  totalnum, (double)totalsz / (1024.0 * 1024.0));
 
-    cfgClose();
+    cfg_Close();
 }
 
-SpriteClassId spritesGetIdByName(const char *name)
+SpriteClassId sprites_GetIdByName(const char *name)
 {
     int i;
 
-    for(i = 0; i < spritesCCount; ++i)
-        if(!strcmp(spritesClasses[i].name, name))
+    for(i = 0; i < count; ++i)
+        if(!strcmp(classes[i].name, name))
+        {
             return i;
+        }
 
-    messageCriticalErrorEx("Sprite class '%s' not found!\n", name);
+    message_CriticalErrorEx("Sprite class '%s' not found!\n", name);
     return -1;
 
 }
 
-SpriteClassId spritesGetIdByNameF(const char *namefmt, ...)
+SpriteClassId sprites_GetIdByNameF(const char *namefmt, ...)
 {
     va_list args;
     char buf[1024];
@@ -224,27 +230,27 @@ SpriteClassId spritesGetIdByNameF(const char *namefmt, ...)
     vsnprintf(buf, sizeof(buf), namefmt, args);
     va_end(args);
 
-    return spritesGetIdByName(buf);
+    return sprites_GetIdByName(buf);
 }
 
-void spritesFreeAll()
+void sprites_FreeAll()
 {
     int i, j;
 
-    for(i = 0; i < spritesCCount; ++i)
+    for(i = 0; i < count; ++i)
     {
-        for(j = 0; j < spritesClasses[i].fcount; ++j)
-            glDeleteTextures(1, &spritesClasses[i].frame[j].image);
+        for(j = 0; j < classes[i].fcount; ++j)
+            glDeleteTextures(1, &classes[i].frame[j].image);
 
-        free(spritesClasses[i].frame);
-        free(spritesClasses[i].name);
+        free(classes[i].frame);
+        free(classes[i].name);
     }
 
-    if(spritesClasses)
-        free(spritesClasses);
+    if(classes)
+        free(classes);
 
-    spritesCCount = 0;
-    spritesClasses = NULL;
+    count = 0;
+    classes = NULL;
 
 }
 

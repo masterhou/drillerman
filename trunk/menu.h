@@ -1,8 +1,8 @@
 #ifndef MENU_H
 #define MENU_H
 
-void menuInit(void *data);
-int menuFrame(float lag);
-void menuCleanup();
+void menu_Init(void *data);
+int menu_Frame(float lag);
+void menu_Cleanup();
 
 #endif
