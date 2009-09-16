@@ -101,11 +101,40 @@ static void advanceLevel(int hitx)
     level_Advance(hitx, level);
 }
 
+static bool checkSupport(int vx, int vy, float hoff, Direction *leanOutDirection)
+{
+    bool hasSupport = level_IsSolid(vx, vy + 1);
+
+    *leanOutDirection = DIR_NONE;
+
+    /*
+       Check if the player is leaning out of the
+       main brick he is standing on causing him to
+       gain additional support.
+    */
+
+    if(((float)_BRICK_WIDTH - hoff) < (float)_PLAYER_WIDTH2)
+        if(level_IsSolid(vx + 1, vy + 1))
+        {
+            hasSupport = true;
+            *leanOutDirection = DIR_RIGHT;
+        }
+
+    if(hoff < (float)_PLAYER_WIDTH2)
+        if(level_IsSolid(vx - 1, vy + 1))
+        {
+            hasSupport = true;
+            *leanOutDirection = DIR_LEFT;
+        }
+
+    return hasSupport;
+}
+
 static void updatePlayerPosition(float lag)
 {
     bool animationSet = false;
-    bool additionalSupport = false;
-    Direction leanOutDirection = DIR_NONE;
+    bool hasSupport;
+    Direction leanOutDirection;
     int i;
 
     int vx = playerPos.x / (float)_BRICK_WIDTH;
@@ -114,6 +143,45 @@ static void updatePlayerPosition(float lag)
     for(i = 0; i < DIR_COUNT; ++i)
         if(input_IsDirPressed(i))
             playerDirection = i;
+
+    /* get player horiz offset relative to current column */
+
+    float hoff = fmodf(playerPos.x, (float)_BRICK_WIDTH);
+    float voff = fmodf(playerPos.y, (float)_BRICK_HEIGHT);
+
+    /* check if player has support */
+
+    hasSupport = checkSupport(vx, vy, hoff, &leanOutDirection);
+
+    if(!hasSupport)
+    {
+        float dy = (float)_PLAYER_FALL_SPEED * lag;
+
+        if((voff + dy) >= (float)_BRICK_HEIGHT && checkSupport(vx, vy + 1, hoff, &leanOutDirection))
+            /* if player vy is changing then correct dy so
+                   player doesn't go too low */
+            playerPos.y = (float)((vy + 1) * _BRICK_HEIGHT);
+        else
+            playerPos.y += dy;
+
+        changePlayerAnimation(scidPlayerFall);
+        /* cancel slipping move if player lost his support */
+        slipping = false;
+
+        return;
+    }
+
+    /* process player slipping move */
+
+    if(slipping)
+    {
+        /* What if player suddenly gains support or his way
+           is blocked by a falling brick? Simple - it can't
+           happen because that would mean he was smashed. */
+
+        playerPos.x += lag * _PLAYER_SLIP_SPEED * directionDelta[slipDirection][0];
+        return;
+    }
 
     /* climbing bricks */
 
@@ -160,61 +228,6 @@ static void updatePlayerPosition(float lag)
         if(goingUpShift < 0)
             goingUpShift = 0;
     }
-
-    /* get player horiz offset relative to current column */
-
-    float hoff = fmodf(playerPos.x, (float)_BRICK_WIDTH);
-    float voff = fmodf(playerPos.y, (float)_BRICK_HEIGHT);
-
-    /* check if player has support */
-
-    bool hasSupport = level_IsSolid(vx, vy + 1);
-
-    /*
-       Check if the player is leaning out of the
-       main brick he is standing on causing him to
-       gain additional support.
-    */
-    if(((float)_BRICK_WIDTH - hoff) < (float)_PLAYER_WIDTH2)
-    {
-        additionalSupport = level_IsSolid(vx + 1, vy + 1);
-        hasSupport = hasSupport ||  additionalSupport;
-        leanOutDirection = DIR_RIGHT;
-    }
-
-    if(hoff < (float)_PLAYER_WIDTH2)
-    {
-        additionalSupport = level_IsSolid(vx - 1, vy + 1);
-        hasSupport = hasSupport ||  additionalSupport;
-        leanOutDirection = DIR_LEFT;
-    }
-
-    if(!hasSupport)
-    {
-        playerPos.y += (float)_PLAYER_FALL_SPEED * lag;
-        changePlayerAnimation(scidPlayerFall);
-
-        /* cancel slipping move if player lost his support */
-        slipping = false;
-        return;
-    }
-    else if(voff > 0)
-    {
-        playerPos.y -= voff;
-        voff = 0;
-    }
-
-    /* process player slipping move */
-
-    if(slipping)
-    {
-        /* What if player suddenly gains support or his way
-           is blocked by a falling brick? Simple - it can't
-           happen because that would mean he was smashed. */
-
-        playerPos.x += lag * _PLAYER_SLIP_SPEED * directionDelta[slipDirection][0];
-    }
-
 
     /* check keystates and update position/animation accordingly */
 
@@ -270,7 +283,7 @@ static void updatePlayerPosition(float lag)
                     player destroys a brick beneath and doesn't fall because
                     he has additional support.
                 */
-                if(playerDirection == DIR_DOWN && additionalSupport)
+                if(playerDirection == DIR_DOWN && leanOutDirection != DIR_NONE)
                 {
                     slipping = true;
 
@@ -308,6 +321,12 @@ static void updatePlayerPosition(float lag)
                         }
 
                         animationSet = false;
+
+                        if(i == DIR_RIGHT)
+                            playerPos.x = (float)((vx * _BRICK_WIDTH) + _BRICK_WIDTH - _PLAYER_WIDTH2);
+                        else
+                            playerPos.x = (float)((vx * _BRICK_WIDTH) + _PLAYER_WIDTH2);
+
                         break;
                     }
 

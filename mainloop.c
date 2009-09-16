@@ -154,7 +154,7 @@ void mainloop_Go()
         graphicsBlitBuffer();
 
         timer_CleanTimers();
-        SDL_Delay(10);
+        SDL_Delay(30);
     }
 
 }
