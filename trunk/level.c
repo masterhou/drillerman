@@ -875,7 +875,6 @@ void level_Frame(float lag)
                 {
                     particles_UnsetFlag(f->particle, PF_BLINKING);
                     setBrickDestroying(f, x, y);
-                    f->particle = NULL;
                 }
             }
 
