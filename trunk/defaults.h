@@ -79,7 +79,8 @@
 #define _INTER_LAYER 10
 #define _INTER_BLOW_DELAY 0.2
 
-#define _LEVEL_ADVANCE_FADE_SPEED 2.0
+#define _LEVEL_ADVANCE_FADE_SPEED 0.5
+#define _LEVEL_ADVANCE_VELOCITY 150.0
 
 #ifndef _DATA_PATH 
 #define _DATA_PATH "./data/"

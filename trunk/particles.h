@@ -55,9 +55,10 @@ void particles_SetDestroyDistance(Particle *particle, float destroyDistance);
 void particles_SetTrail(Particle *particle, float trailSpacing, float trailFadeSpeed);
 Particle *particles_Clone(Particle *particle);
 void particles_SetTimeout(Particle *particle, float timeout);
-void particles_SetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival);
+void particles_SetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival, bool stopOnArrival);
 void particles_Frame(float lag);
 void particles_SetBlinking(Particle *particle, float frequency);
 void particles_DestroyOnAnimationEnd(Particle *particle);
+void particles_SetVelocityFromNormalizedVector(Particle *particle, Point unnormVector, float speed);
 
 #endif

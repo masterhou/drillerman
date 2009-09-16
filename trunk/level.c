@@ -120,7 +120,13 @@ void level_Advance(int hitx, int nextLevel)
                 else
                     p = particles_Add(f->sprite);
 
+                const Point vector = {
+                                        (float)x - ((float)mapWidth / 2.0),
+                                        (float)y - (float)mapHeight - 15.0
+                                        };
+
                 particles_SetFading(p, _LEVEL_ADVANCE_FADE_SPEED, true);
+                particles_SetVelocityFromNormalizedVector(p, vector, _LEVEL_ADVANCE_VELOCITY);
 
                 f->type = VF_NONE;
                 f->sprite = NULL;

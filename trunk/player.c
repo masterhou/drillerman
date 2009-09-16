@@ -367,8 +367,7 @@ static void collectItems()
     {
         snge_RelativizeSprite(itemSprite);
         Particle *p = particles_Add(itemSprite);
-        particles_SetDestination(p, point(_AIR_DEST_X, _AIR_DEST_Y), _AIR_FLY_SPEED, true, false);
-
+        particles_SetDestination(p, point(_AIR_DEST_X, _AIR_DEST_Y), _AIR_FLY_SPEED, true, false, true);
         particles_SetTrail(p, _AIR_TRAIL_SPACING, p->fadeSpeed);
         p->fadeSpeed /= 3.0;
         p->rotateSpeed = _AIR_ROT_SPEED;

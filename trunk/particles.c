@@ -122,7 +122,15 @@ void particles_SetBlinking(Particle *particle, float frequency)
     particle->fadeSpeed = frequency;
 }
 
-void particles_SetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival)
+void particles_SetVelocityFromNormalizedVector(Particle *particle, Point unnormVector, float speed)
+{
+    float vLen = sqrtf(SQR(unnormVector.x) + SQR(unnormVector.y));
+
+    particle->vx = unnormVector.x / vLen * speed;
+    particle->vy = unnormVector.y / vLen * speed;
+}
+
+void particles_SetDestination(Particle *particle, Point destination, float speed, bool fadeOut, bool destroyOnArrival, bool stopOnArrival)
 {
     particle->distance = 0.0;
 
@@ -136,7 +144,8 @@ void particles_SetDestination(Particle *particle, Point destination, float speed
 
     if(destroyOnArrival)
         particles_SetFlag(particle, PF_DESTROY_ON_DISTANCE);
-    else
+
+    if(stopOnArrival)
         particles_SetFlag(particle, PF_STOP_ON_DISTANCE);
     
     if(fadeOut)
