@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "defaults.h"
+#include "defs.h"
 #include "common.h"
 #include "sprites.h"
 #include "brickshape.h"
@@ -47,12 +47,12 @@ typedef struct
     SpriteClassId interBrick;
     SpriteClassId bricks[VF_BRICK_COUNT][_BRICK_TYPE_COUNT];
     SpriteClassId destroyAnim[VF_LAST];
-    SpriteClassId destroyParticle[_DESTROY_PARTICLE_TYPE_COUNT];
+    SpriteClassId destroyParticle[_EXPLODE_PARTICLE_TYPE_COUNT];
 } LevelSpriteClasses;
 
 static void generateMaps();
 static void loadScids();
-static void addDestroyParticles(float x, float y);
+static void addExplodeParticles(float x, float y);
 static void updateBrickShape(MapField **cMap, const LevelSpriteClasses *pScids);
 static void allocSprites(MapField **cMap, LevelSpriteClasses *pScids, float vertShift);
 static float getShakeShift(int y);
@@ -179,7 +179,7 @@ static inline void interAreaHit(int x, int y)
     f->particle = particles_Add(f->sprite);
     particles_SetFading(f->particle, _INTER_FADE_SPEED, true);
 
-    addDestroyParticles(f->sprite->x + (float)_BRICK_WIDTH / 2.0,
+    addExplodeParticles(f->sprite->x + (float)_BRICK_WIDTH / 2.0,
                         f->sprite->y + (float)_BRICK_HEIGHT / 2.0);
     f->sprite = NULL;
 }
@@ -310,7 +310,7 @@ static void loadScids()
         for(j = 0; j < 4; ++j)
             pscids->crateHit[j] = sprites_GetIdByNameF("level_common:crate_hit_%d", j + 1);
 
-        for(j = 0; j < _DESTROY_PARTICLE_TYPE_COUNT; ++j)
+        for(j = 0; j < _EXPLODE_PARTICLE_TYPE_COUNT; ++j)
             pscids->destroyParticle[j] = sprites_GetIdByNameF("level_common:dparticle-%d", j + 1);
 
         pscids->destroyAnim[VF_CRATE] = sprites_GetIdByName("level_common:crate-destroy");
@@ -332,18 +332,18 @@ static void loadScids()
     cScids = scids[0];
 }
 
-static void addDestroyParticles(float x, float y)
+static void addExplodeParticles(float x, float y)
 {
     Point p = {x: x, y: y};
     int i;
 
-    for(i = 0; i < _DESTROY_PARTICLE_COUNT; ++i)
+    for(i = 0; i < _EXPLODE_PARTICLE_COUNT; ++i)
     {
-        Sprite *s = snge_AddSprite(cScids->destroyParticle[rand() % _DESTROY_PARTICLE_TYPE_COUNT], p, 10);
+        Sprite *s = snge_AddSprite(cScids->destroyParticle[rand() % _EXPLODE_PARTICLE_TYPE_COUNT], p, _EXPLODE_PARTICLES_LAYER);
         Particle *p = particles_Add(s);
-        particles_SetVelocityDegrees(p, rand() % 360, _DESTROY_PARTICLE_MAX_SPEED * common_RandD(), true);
-        particles_SetFading(p, _DESTROY_PARTICLE_FADE_SPEED, true);
-        p->rotateSpeed = _DESTROY_PARTICLE_MAX_ROT_SPEED * common_RandD();
+        particles_SetVelocityDegrees(p, rand() % 360, _EXPLODE_PARTICLE_MAX_SPEED * common_RandD(), true);
+        particles_SetFading(p, _EXPLODE_PARTICLE_FADE_SPEED, true);
+        p->rotateSpeed = _EXPLODE_PARTICLE_MAX_ROT_SPEED * common_RandD();
     }
 
 }
@@ -428,11 +428,11 @@ static void allocSprites(MapField **tMap, LevelSpriteClasses *pScids, float vert
             tMap[x][y].sprite = NULL;
 
             if(vf < VF_BRICK_COUNT)
-                tMap[x][y].sprite = snge_AddSprite(pScids->bricks[vf][0], s, 5);
+                tMap[x][y].sprite = snge_AddSprite(pScids->bricks[vf][0], s, _BRICKS_LAYER);
             else if(vf == VF_CRATE)
-                tMap[x][y].sprite = snge_AddSprite(pScids->crate, s, 5);
+                tMap[x][y].sprite = snge_AddSprite(pScids->crate, s, _BRICKS_LAYER);
             else if(vf == VF_AIR)
-                tMap[x][y].sprite = snge_AddSprite(pScids->air, s, 5);
+                tMap[x][y].sprite = snge_AddSprite(pScids->air, s, _BRICKS_LAYER);
         }
 
     updateBrickShape(tMap, pScids);
@@ -726,7 +726,7 @@ static void setBrickDestroying(MapField *field, int x, int y)
     field->sprite->sclass = cScids->destroyAnim[field->type];
     field->sprite->frame = 0;
     particles_DestroyOnAnimationEnd(field->particle);
-    addDestroyParticles(field->sprite->x + (float)_BRICK_WIDTH / 2.0,
+    addExplodeParticles(field->sprite->x + (float)_BRICK_WIDTH / 2.0,
                         field->sprite->y + (float)_BRICK_HEIGHT / 2.0);
     field->sprite = NULL;
     field->state = FS_VANISH;

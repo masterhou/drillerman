@@ -3,7 +3,7 @@ common.c
 common.h
 config.c
 config.h
-defaults.h
+defs.h
 exitscr.c
 exitscr.h
 game.c

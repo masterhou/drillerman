@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "message.h"
+#include "defs.h"
 
 static FILE* cfgfile = NULL;
 static long section_offset = 0;
@@ -84,15 +85,15 @@ void cfg_Close()
 int cfg_SeekSection(char *section_name)
 {
 
-    char buffer[256];
-    char pattern[256];
+    char buffer[_STR_BUFLEN];
+    char pattern[_STR_BUFLEN];
     int found = 0;
 
     sprintf(pattern, "[%s]", section_name);
 
     rewind(cfgfile);
 
-    do fgets(buffer, 256, cfgfile);
+    do fgets(buffer, _STR_BUFLEN, cfgfile);
     while(!feof(cfgfile) && !(found = checkPattern(pattern, buffer)));
 
     if(found)
@@ -110,13 +111,13 @@ int cfg_SeekSection(char *section_name)
 int cfg_NextSection(char *section_name)
 {
 
-    char buffer[256];
-    char pattern[256];
+    char buffer[_STR_BUFLEN];
+    char pattern[_STR_BUFLEN];
     int found = 0;
 
     sprintf(pattern, "[");
 
-    do fgets(buffer, 256, cfgfile);
+    do fgets(buffer, _STR_BUFLEN, cfgfile);
     while(!feof(cfgfile) && !(found = checkPattern(pattern, buffer)));
 
     if(found)
@@ -139,7 +140,7 @@ int cfg_NextSection(char *section_name)
 int cfg_GetIntValue(char *valueName, int *value)
 {
 
-    char buffer[256];
+    char buffer[_STR_BUFLEN];
 
     if(cfg_GetStringValue(valueName, buffer))
     {
@@ -188,8 +189,8 @@ int cfg_GetDoubleValue(char *value_name, double *value)
 int cfg_GetStringValue(char *value_name, char *str)
 {
 
-    char buffer[256];
-    char pattern[256];
+    char buffer[_STR_BUFLEN];
+    char pattern[_STR_BUFLEN];
     int found = 0;
 
     sprintf(pattern, "%s=", value_name);
@@ -197,7 +198,7 @@ int cfg_GetStringValue(char *value_name, char *str)
     fseek(cfgfile, section_offset, SEEK_SET);
 
 
-    do fgets(buffer, 255, cfgfile);
+    do fgets(buffer, _STR_BUFLEN, cfgfile);
     while(!feof(cfgfile) && !checkPattern("[", buffer) && !(found = checkPattern(pattern, buffer)));
 
     if(found)
@@ -214,8 +215,8 @@ int cfg_GetStringValue(char *value_name, char *str)
 
 int cfg_GetTag(char *tag_name)
 {
-    char buffer[256];
-    char pattern[256];
+    char buffer[_STR_BUFLEN];
+    char pattern[_STR_BUFLEN];
     int found = 0;
 
     sprintf(pattern, "%s=", tag_name);
@@ -223,7 +224,7 @@ int cfg_GetTag(char *tag_name)
     fseek(cfgfile, section_offset, SEEK_SET);
 
 
-    do fgets(buffer, 255, cfgfile);
+    do fgets(buffer, _STR_BUFLEN, cfgfile);
     while(!feof(cfgfile) && !checkPattern("[", buffer) && !(found = checkPattern(pattern, buffer)));
 
     return found;

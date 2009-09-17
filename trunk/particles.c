@@ -5,7 +5,7 @@
 #include <math.h>
 
 #include "snge.h"
-#include "defaults.h"
+#include "defs.h"
 #include "graphics.h"
 
 static Particle **particles;
@@ -188,14 +188,12 @@ void particles_Frame(float lag)
     {
         Particle *p = particles[i];
 
-        /* If something outside the particle
-           engine wants it destroyed. We have
-           to do it here because the sprite
-           can be already freed. */
-        if(p->destroyScheduled)
+        /* If the sprite is scheduled for destroy
+           dispose of the particle */
+
+        if(p->sprite->destroy)
         {
-            p->sprite->destroy = true;
-            free(p);
+            p->destroyScheduled = true;
             continue;
         }
 
@@ -328,7 +326,9 @@ void particles_Frame(float lag)
             }
         }
 
-        if(p->destroyScheduled)
+        const bool destroy = p->destroyScheduled;
+
+        if(destroy)
         /* Finally we can free particles from current table. */
             free(p);
     }

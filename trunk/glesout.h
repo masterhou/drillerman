@@ -4,7 +4,7 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-#include "defaults.h"
+#include "defs.h"
 #include "graphics.h"
 #define FILTER_LINEAR 0
 #define FILTER_MIPMAP 1

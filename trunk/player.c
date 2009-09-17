@@ -6,9 +6,16 @@
 #include "snge.h"
 #include "sprites.h"
 #include "level.h"
-#include "timer.h"
 #include "bcg.h"
 #include "particles.h"
+
+static inline bool drillField(int x, int y);
+static inline void changePlayerAnimation(SpriteClassId scid);
+static void addDrillParticles(int x, int y, Direction hitDirection);
+static void advanceLevel(int hitx);
+static bool checkSupport(int vx, int vy, float hoff, Direction *leanOutDirection);
+static void updatePlayerPosition(float lag);
+
 
 static char directionName[DIR_COUNT][50] = {"left", "right", "up", "down"};
 static int directionDelta[DIR_COUNT][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
@@ -19,7 +26,7 @@ static SpriteClassId scidPlayerDrill[4];
 static SpriteClassId scidPlayerWalk[2];
 static SpriteClassId scidPlayerFall;
 
-static SpriteClassId scidParticle;
+static SpriteClassId scidDrillParticle;
 
 static Point viewportPos;
 
@@ -37,7 +44,7 @@ static bool goingUp;
 static bool goingUpTrigger;
 static float goingUpShift;
 static Direction goingUpDirection;
-static TimerHandle goingUpTimer;
+static float goingUpTimer;
 
 static Bcg bcg;
 static Bcg bcgNext;
@@ -53,7 +60,7 @@ static inline void changePlayerAnimation(SpriteClassId scid)
     player->frame = 0;
 }
 
-static inline bool hitField(int x, int y)
+static inline bool drillField(int x, int y)
 {
     if(!INBOUND(x, y, mapWidth, mapHeight))
         return false;
@@ -76,22 +83,22 @@ static inline bool hitField(int x, int y)
     return false;
 }
 
-static void addHitParticles(int x, int y, Direction hitDirection)
+static void addDrillParticles(int x, int y, Direction drillDirection)
 {
     int k;
 
-    for(k = 0; k < _HIT_PARTICLE_COUNT; ++k)
+    for(k = 0; k < _DRILL_PARTICLE_COUNT; ++k)
     {
-        Sprite *sp = snge_AddSprite(scidParticle, point(0, 0), 100);
+        Sprite *sp = snge_AddSprite(scidDrillParticle, point(0, 0), _DRILL_PARTICLES_LAYER);
         sp->x = x;
         sp->y = y;
         Particle *p = particles_Add(sp);
         particles_SetVelocity(p,
-                             -(float)directionDelta[hitDirection][0] * _HIT_PARTICLE_FALL_SPEED * common_RandD() +
-                             (float)directionDelta[hitDirection][1] * _HIT_PARTICLE_FALL_SPEED * (common_RandD() - 0.5),
-                             -(float)directionDelta[hitDirection][1] * _HIT_PARTICLE_FALL_SPEED * common_RandD() +
-                             (float)directionDelta[hitDirection][0] * _HIT_PARTICLE_FALL_SPEED * (common_RandD() - 0.5), true);
-        particles_SetFading(p, _HIT_PARTICLE_FADE_SPEED, true);
+                             -(float)directionDelta[drillDirection][0] * _DRILL_PARTICLE_FALL_SPEED * common_RandD() +
+                             (float)directionDelta[drillDirection][1] * _DRILL_PARTICLE_FALL_SPEED * (common_RandD() - 0.5),
+                             -(float)directionDelta[drillDirection][1] * _DRILL_PARTICLE_FALL_SPEED * common_RandD() +
+                             (float)directionDelta[drillDirection][0] * _DRILL_PARTICLE_FALL_SPEED * (common_RandD() - 0.5), true);
+        particles_SetFading(p, _DRILL_PARTICLE_FADE_SPEED, true);
     }
 }
 
@@ -137,17 +144,20 @@ static void updatePlayerPosition(float lag)
     Direction leanOutDirection;
     int i;
 
+    goingUpTimer += lag;
+
     int vx = playerPos.x / (float)_BRICK_WIDTH;
     int vy = playerPos.y / (float)_BRICK_HEIGHT;
-
-    for(i = 0; i < DIR_COUNT; ++i)
-        if(input_IsDirPressed(i))
-            playerDirection = i;
 
     /* get player horiz offset relative to current column */
 
     float hoff = fmodf(playerPos.x, (float)_BRICK_WIDTH);
     float voff = fmodf(playerPos.y, (float)_BRICK_HEIGHT);
+
+
+    for(i = 0; i < DIR_COUNT; ++i)
+        if(input_IsDirPressed(i))
+            playerDirection = i;
 
     /* check if player has support */
 
@@ -185,7 +195,7 @@ static void updatePlayerPosition(float lag)
 
     /* climbing bricks */
 
-    if(goingUpTrigger && timer_Fired(goingUpTimer))
+    if(goingUpTrigger && goingUpTimer >= _DELAY_BEFORE_CLIMB)
     {
         goingUpTrigger = false;
         goingUp = true;
@@ -211,7 +221,7 @@ static void updatePlayerPosition(float lag)
         if(goingUpShift >= _BRICK_HEIGHT)
         {
             goingUp = false;
-            goingUpShift = 0;
+            goingUpShift = 0.0;
 
             playerPos.y -= _BRICK_HEIGHT;
 
@@ -221,12 +231,12 @@ static void updatePlayerPosition(float lag)
             playerPos.x += (float)directionDelta[goingUpDirection][0] * _PLAYER_SPEED * lag;
         }
     }
-    else if(goingUpShift != 0)
+    else if(goingUpShift != 0.0)
     {
         goingUpShift -= _PLAYER_FALL_SPEED * lag;
 
-        if(goingUpShift < 0)
-            goingUpShift = 0;
+        if(goingUpShift < 0.0)
+            goingUpShift = 0.0;
     }
 
     /* check keystates and update position/animation accordingly */
@@ -247,7 +257,7 @@ static void updatePlayerPosition(float lag)
         {
             if(playerDirection > DIR_RIGHT)
             {
-                destroyed = hitField(vx, vy + directionDelta[playerDirection][1]);
+                destroyed = drillField(vx, vy + directionDelta[playerDirection][1]);
 
                 hx = playerPos.x;
                 hy = vy * _BRICK_HEIGHT;
@@ -258,7 +268,7 @@ static void updatePlayerPosition(float lag)
 
             if(playerDirection == DIR_LEFT && hoff < (_HIT_DISTANCE_THRESHOLD + _PLAYER_WIDTH2))
             {
-                destroyed = hitField(vx - 1, vy);
+                destroyed = drillField(vx - 1, vy);
 
                 hx = vx * _BRICK_WIDTH;
                 hy = vy * _BRICK_HEIGHT + _BRICK_HEIGHT / 2;
@@ -266,7 +276,7 @@ static void updatePlayerPosition(float lag)
 
             if(playerDirection == DIR_RIGHT && (_BRICK_WIDTH - _PLAYER_WIDTH2 - hoff) < _HIT_DISTANCE_THRESHOLD)
             {
-                destroyed = hitField(vx + 1, vy);
+                destroyed = drillField(vx + 1, vy);
 
                 hx = (vx + 1) * _BRICK_WIDTH;
                 hy = vy * _BRICK_HEIGHT + _BRICK_HEIGHT / 2;
@@ -274,7 +284,7 @@ static void updatePlayerPosition(float lag)
 
             if(destroyed)
             {
-                addHitParticles(hx, hy, playerDirection);
+                addDrillParticles(hx, hy, playerDirection);
 
                 /*
                     Cause player to slip off the brick he is standing off
@@ -315,9 +325,9 @@ static void updatePlayerPosition(float lag)
                         {
                                 goingUp = false;
                                 goingUpTrigger = true;
-                                goingUpShift = 0;
+                                goingUpShift = 0.0;
                                 goingUpDirection = i;
-                                goingUpTimer = timer_AddTimer(_DELAY_BEFORE_CLIMB, 1);
+                                goingUpTimer = 0.0;
                         }
 
                         animationSet = false;
@@ -362,10 +372,10 @@ void player_Init(int levelHeight)
     scidPlayerWalk[0] = sprites_GetIdByName("level_common:dman-walkleft");
     scidPlayerWalk[1] = sprites_GetIdByName("level_common:dman-walkright");
 
-    scidParticle = sprites_GetIdByName("level_common:particle-1");
+    scidDrillParticle = sprites_GetIdByName("level_common:particle-1");
 
     playerDirection = 3;
-    player = snge_AddSprite(scidPlayerStand[playerDirection], point(0, 0), 6);
+    player = snge_AddSprite(scidPlayerStand[playerDirection], point(0, 0), _PLAYER_LAYER);
     player->relative = true;
     playerPos = point((_MAP_WIDTH / 2) * _BRICK_WIDTH + (_BRICK_WIDTH / 2), 0);
     viewportPos.y = - _MAP_OFFSET_Y + playerPos.y - goingUpShift;

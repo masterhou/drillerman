@@ -5,7 +5,7 @@
 
 #include <SDL/SDL.h>
 
-#include "defaults.h"
+#include "defs.h"
 #include "mainloop.h"
 #include "message.h"
 #include "input.h"
