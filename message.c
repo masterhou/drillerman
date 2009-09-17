@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include "defaults.h"
+#include "defs.h"
 
 #define colorRed(s) fprintf(s, "\033[1;31m")
 #define colorBlue(s) fprintf(s, "\033[1;34m")

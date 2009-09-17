@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "defaults.h"
+#include "defs.h"
 #include "message.h"
 #include "mainloop.h"
 #include "level.h"

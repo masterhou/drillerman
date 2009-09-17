@@ -5,7 +5,7 @@
 #include <math.h>
 
 #include "message.h"
-#include "defaults.h"
+#include "defs.h"
 
 #define OUTSIDE_SCREEN(tx, ty, tw, th) (						\
         ((_SCREEN_WIDTH - 1) < (tx)) || 		\
@@ -147,8 +147,9 @@ void snge_CleanupSprites()
     for(i = 0; i < count; ++i)
     {
         Sprite *sp = sprites[i];
+        const bool destroy = sp->destroy;
 
-        if(sp->destroy)
+        if(destroy)
         {
             free(sp);
         }

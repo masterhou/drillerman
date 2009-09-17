@@ -1,7 +1,7 @@
 #ifndef BCG_H
 #define BCG_H
 
-#include "defaults.h"
+#include "defs.h"
 #include "snge.h"
 
 typedef struct

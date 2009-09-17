@@ -37,7 +37,7 @@ void sprites_LoadFromCfg(const char *cfgpathrel, const char *namePrefix)
 
     extern char dataPath[];
 
-    char path[256] = {'\0'};
+    char path[_STR_BUFLEN] = {'\0'};
 
     strcat(path, dataPath);
     strcat(path, cfgpathrel);
@@ -47,8 +47,8 @@ void sprites_LoadFromCfg(const char *cfgpathrel, const char *namePrefix)
     unsigned int totalsz = 0;
     int totalnum = 0;
 
-    char name[256];
-    char sprpath[256];
+    char name[_STR_BUFLEN];
+    char sprpath[_STR_BUFLEN];
 
     common_GetBasePath(path, sprpath);
 
@@ -87,9 +87,9 @@ void sprites_LoadFromCfg(const char *cfgpathrel, const char *namePrefix)
 
         for(i = 0; i < sc->fcount; ++i)
         {
-            char texfile[256];
-            char framestr[256];
-            char texpath[256];
+            char texfile[_STR_BUFLEN];
+            char framestr[_STR_BUFLEN];
+            char texpath[_STR_BUFLEN];
 
             SpriteFrame *frame = &sc->frame[i];
 
@@ -129,7 +129,7 @@ inline SpriteClass* sprites_GetClass(SpriteClassId id)
 void sprites_LoadFromCfgF(const char *cfgpathrelfmt, const char *namePrefix, ...)
 {
     va_list args;
-    char buf[1024];
+    char buf[_STR_BUFLEN];
 
     va_start(args, namePrefix);
     vsnprintf(buf, sizeof(buf), cfgpathrelfmt, args);
@@ -142,15 +142,15 @@ void sprites_LoadFontsFromCfg(char *cfgpathrel)
 {
     extern char dataPath[];
 
-    char path[256] = {'\0'};
+    char path[_STR_BUFLEN] = {'\0'};
 
     strcat(path, dataPath);
     strcat(path, cfgpathrel);
 
     cfg_Open(path);
 
-    char name[256];
-    char imgpath[256];
+    char name[_STR_BUFLEN];
+    char imgpath[_STR_BUFLEN];
     unsigned int totalsz = 0;
     int totalnum = 0;
 
@@ -174,8 +174,8 @@ void sprites_LoadFontsFromCfg(char *cfgpathrel)
         sc->frame = malloc(sizeof(SpriteFrame));
         sc->ssc = SSC_BFNT;
 
-        char texfile[256];
-        char texpath[256];
+        char texfile[_STR_BUFLEN];
+        char texpath[_STR_BUFLEN];
 
         cfg_GetIntValue("char_width", &sc->font.char_width);
         cfg_GetIntValue("char_height", &sc->font.char_height);
@@ -224,7 +224,7 @@ SpriteClassId sprites_GetIdByName(const char *name)
 SpriteClassId sprites_GetIdByNameF(const char *namefmt, ...)
 {
     va_list args;
-    char buf[1024];
+    char buf[_STR_BUFLEN];
 
     va_start(args, namefmt);
     vsnprintf(buf, sizeof(buf), namefmt, args);

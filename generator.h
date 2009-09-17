@@ -1,7 +1,7 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
-#include "defaults.h"
+#include "defs.h"
 #include "common.h"
 
 typedef enum 

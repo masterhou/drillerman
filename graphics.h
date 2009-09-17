@@ -1,7 +1,7 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-#include "defaults.h"
+#include "defs.h"
 #include "common.h"
 
 typedef enum
