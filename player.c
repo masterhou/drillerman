@@ -45,11 +45,15 @@ static bool goingUpTrigger;
 static float goingUpShift;
 static Direction goingUpDirection;
 static float goingUpTimer;
+static bool levelAdvanceFalling;
+static float levelAdvanceDistance;
 
 static Bcg bcg;
 static Bcg bcgNext;
 
 static int level;
+static int vx;
+static int vy;
 
 static inline void changePlayerAnimation(SpriteClassId scid)
 {
@@ -106,6 +110,10 @@ static void advanceLevel(int hitx)
 {
     level++;
     level_Advance(hitx, level);
+    input_UnsetPressed(KEY_DRILL);
+    levelAdvanceFalling = true;
+    levelAdvanceDistance = 0.0;
+    changePlayerAnimation(scidPlayerFall);
 }
 
 static bool checkSupport(int vx, int vy, float hoff, Direction *leanOutDirection)
@@ -139,6 +147,23 @@ static bool checkSupport(int vx, int vy, float hoff, Direction *leanOutDirection
 
 static void updatePlayerPosition(float lag)
 {
+    if(levelAdvanceFalling)
+    {
+        float dy = _PLAYER_FALL_SPEED * lag;
+        float interHeight = (float)(_BRICK_HEIGHT * _INTER_ROW_COUNT);
+
+        levelAdvanceDistance += dy;
+
+        if(levelAdvanceDistance >= interHeight)
+        {
+            dy -= levelAdvanceDistance - interHeight;
+            levelAdvanceFalling = false;
+        }
+
+        playerPos.y += dy;
+        return;
+    }
+
     bool animationSet = false;
     bool hasSupport;
     Direction leanOutDirection;
@@ -244,7 +269,10 @@ static void updatePlayerPosition(float lag)
     if(input_IsKeyPressed(KEY_DRILL))
     {
         if(vy == (mapHeight - 1) && voff == 0.0 && playerDirection == DIR_DOWN)
+        {
             advanceLevel(vx);
+            return;
+        }
 
         animationSet = true;
         changePlayerAnimation(scidPlayerDrill[playerDirection]);
@@ -354,6 +382,7 @@ void player_Init(int levelHeight)
 {
     mapHeight = levelHeight;
     level = 0;
+    levelAdvanceFalling = false;
 
     bcg = bcg_Create(0, 0);
     level_Init(mapHeight);

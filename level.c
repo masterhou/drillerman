@@ -83,6 +83,8 @@ static Stack mainStack;
 static Stack timerStack;
 static Stack shiftStack;
 
+static float vShift;
+
 static bool needShapeUpdate;
 
 void level_Advance(int hitx, int nextLevel)
@@ -110,6 +112,12 @@ void level_Advance(int hitx, int nextLevel)
 
             if(f->sprite != NULL || f->type != VF_NONE)
             {
+                if(f->type < VF_BRICK_COUNT)
+                {
+                    f->sprite->sclass = cScids->bricks[f->type][_BRICK_SINGLE_TYPE_NR];
+                    f->sprite->frame = 0;
+                }
+
                 Particle *p;
 
                 if(f->state == FS_BLINK && f->particle != NULL)
@@ -133,25 +141,30 @@ void level_Advance(int hitx, int nextLevel)
             }
         }
 
-    //cMap = maps[nextLevel];
-    //cScids = scids[nextLevel];
+    /* -1 because first row of every map is empty so the player can start there */
+    float vertShift = (float)(_BRICK_HEIGHT * (_INTER_ROW_COUNT + mapHeight - 1));
 
+    allocSprites(maps[nextLevel], scids[nextLevel], vertShift);
+
+    cMap = maps[nextLevel];
+    cScids = scids[nextLevel];
+    vShift = vertShift;
 
 
 }
 
-static void interAreaAllocate(float vShift)
+static void interAreaAllocate(float vertShift)
 {
     interArea = (InterField**)common_Alloc2DTable(_MAP_WIDTH, _INTER_ROW_COUNT, sizeof(InterField));
 
-    vShift += (float)mapHeight * (float)_BRICK_HEIGHT;
+    vertShift += (float)mapHeight * (float)_BRICK_HEIGHT;
 
     int x, y;
 
     for(x = 0; x < _MAP_WIDTH; ++x)
     {
         float xpos = (float)_BRICK_WIDTH * (float)x;
-        float ypos = vShift;
+        float ypos = vertShift;
 
         for(y = 0; y < _INTER_ROW_COUNT; ++y)
         {
@@ -423,7 +436,7 @@ static void allocSprites(MapField **tMap, LevelSpriteClasses *pScids, float vert
             vf = tMap[x][y].type;
 
             s.x = _BRICK_WIDTH * x;
-            s.y = _BRICK_HEIGHT * y + vertShift;
+            s.y = (_BRICK_HEIGHT * y) + vertShift;
 
             tMap[x][y].sprite = NULL;
 
@@ -936,7 +949,7 @@ void level_Frame(float lag)
 
     for(y = 0; y < mapHeight; ++y)
     {
-        float ypos = y * _BRICK_HEIGHT;
+        float ypos = y * _BRICK_HEIGHT + vShift;
 
         for(x = 0; x < mapWidth; ++x)
         {
@@ -971,6 +984,8 @@ void level_Init(int levelHeight)
 
     allocSprites(cMap, cScids, 0.0);
     interAreaAllocate(0.0);
+
+    vShift = 0.0;
 }
 
 void level_Cleanup()
