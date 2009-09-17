@@ -87,6 +87,8 @@
 #define _DRILL_PARTICLES_LAYER 100
 #define _EXPLODE_PARTICLES_LAYER 100
 
+#define _BRICK_SINGLE_TYPE_NR 8
+
 
 #ifndef _DATA_PATH 
 #define _DATA_PATH "./data/"
