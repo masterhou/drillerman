@@ -10,10 +10,9 @@
 #include "particles.h"
 
 static inline bool drillField(int x, int y);
-static inline void changePlayerAnimation(SpriteClassId scid);
 static void addDrillParticles(int x, int y, Direction hitDirection);
 static void advanceLevel(int hitx);
-static bool checkSupport(int vx, int vy, float hoff, Direction *leanOutDirection);
+static bool checkSupport(int vx, int vy, Direction *leanOutDirection);
 static void updatePlayerPosition(float lag);
 
 
@@ -52,17 +51,12 @@ static Bcg bcg;
 static Bcg bcgNext;
 
 static int level;
+static float hoff;
+static float voff;
 static int vx;
 static int vy;
 
-static inline void changePlayerAnimation(SpriteClassId scid)
-{
-    if(player->sclass == scid)
-        return;
-
-    player->sclass = scid;
-    player->frame = 0;
-}
+static SpriteClassId newAnimation;
 
 static inline bool drillField(int x, int y)
 {
@@ -108,17 +102,16 @@ static void addDrillParticles(int x, int y, Direction drillDirection)
 
 static void advanceLevel(int hitx)
 {
-    level++;
-    level_Advance(hitx, level);
+    level_Advance(hitx, level + 1);
     input_UnsetPressed(KEY_DRILL);
     levelAdvanceFalling = true;
-    levelAdvanceDistance = 0.0;
-    changePlayerAnimation(scidPlayerFall);
+    voff = 0.0;
+    newAnimation = scidPlayerFall;
 }
 
-static bool checkSupport(int vx, int vy, float hoff, Direction *leanOutDirection)
+static bool checkSupport(int x, int y, Direction *leanOutDirection)
 {
-    bool hasSupport = level_IsSolid(vx, vy + 1);
+    bool hasSupport = level_IsSolid(x, y + 1);
 
     *leanOutDirection = DIR_NONE;
 
@@ -129,14 +122,14 @@ static bool checkSupport(int vx, int vy, float hoff, Direction *leanOutDirection
     */
 
     if(((float)_BRICK_WIDTH - hoff) < (float)_PLAYER_WIDTH2)
-        if(level_IsSolid(vx + 1, vy + 1))
+        if(level_IsSolid(x + 1, y + 1))
         {
             hasSupport = true;
             *leanOutDirection = DIR_RIGHT;
         }
 
     if(hoff < (float)_PLAYER_WIDTH2)
-        if(level_IsSolid(vx - 1, vy + 1))
+        if(level_IsSolid(x - 1, y + 1))
         {
             hasSupport = true;
             *leanOutDirection = DIR_LEFT;
@@ -149,36 +142,28 @@ static void updatePlayerPosition(float lag)
 {
     if(levelAdvanceFalling)
     {
-        float dy = _PLAYER_FALL_SPEED * lag;
-        float interHeight = (float)(_BRICK_HEIGHT * _INTER_ROW_COUNT);
+        float interHeight = (float)(_BRICK_HEIGHT * (_INTER_ROW_COUNT));
 
-        levelAdvanceDistance += dy;
+        voff += _PLAYER_FALL_SPEED * lag;
 
-        if(levelAdvanceDistance >= interHeight)
+        if(voff >= interHeight)
         {
-            dy -= levelAdvanceDistance - interHeight;
+            voff = 0.0;
             levelAdvanceFalling = false;
+            vy = 0;
+            level++;
         }
 
-        playerPos.y += dy;
         return;
     }
 
-    bool animationSet = false;
+    newAnimation = scidPlayerStand[playerDirection];
+
     bool hasSupport;
     Direction leanOutDirection;
     int i;
 
     goingUpTimer += lag;
-
-    int vx = playerPos.x / (float)_BRICK_WIDTH;
-    int vy = playerPos.y / (float)_BRICK_HEIGHT;
-
-    /* get player horiz offset relative to current column */
-
-    float hoff = fmodf(playerPos.x, (float)_BRICK_WIDTH);
-    float voff = fmodf(playerPos.y, (float)_BRICK_HEIGHT);
-
 
     for(i = 0; i < DIR_COUNT; ++i)
         if(input_IsDirPressed(i))
@@ -186,20 +171,24 @@ static void updatePlayerPosition(float lag)
 
     /* check if player has support */
 
-    hasSupport = checkSupport(vx, vy, hoff, &leanOutDirection);
+    hasSupport = checkSupport(vx, vy, &leanOutDirection);
 
     if(!hasSupport)
     {
-        float dy = (float)_PLAYER_FALL_SPEED * lag;
+        voff += (float)_PLAYER_FALL_SPEED * lag;
 
-        if((voff + dy) >= (float)_BRICK_HEIGHT && checkSupport(vx, vy + 1, hoff, &leanOutDirection))
-            /* if player vy is changing then correct dy so
-                   player doesn't go too low */
-            playerPos.y = (float)((vy + 1) * _BRICK_HEIGHT);
-        else
-            playerPos.y += dy;
+        if(voff >= (float)_BRICK_HEIGHT)
+        {
+            vy++;
+            voff -= (float)_BRICK_HEIGHT;
 
-        changePlayerAnimation(scidPlayerFall);
+            if(checkSupport(vx, vy + 1, &leanOutDirection))
+                /* if gained support reset voff */
+                voff = 0.0;
+        }
+
+        newAnimation = scidPlayerFall;
+
         /* cancel slipping move if player lost his support */
         slipping = false;
 
@@ -214,7 +203,20 @@ static void updatePlayerPosition(float lag)
            is blocked by a falling brick? Simple - it can't
            happen because that would mean he was smashed. */
 
-        playerPos.x += lag * _PLAYER_SLIP_SPEED * directionDelta[slipDirection][0];
+        hoff += lag * _PLAYER_SLIP_SPEED * (float)directionDelta[slipDirection][0];
+
+        if(hoff >= (float)_BRICK_WIDTH)
+        {
+            hoff -= (float)_BRICK_WIDTH;
+            vx++;
+        }
+
+        if(hoff < 0.0)
+        {
+            hoff += (float)_BRICK_WIDTH;
+            vx--;
+        }
+
         return;
     }
 
@@ -234,34 +236,29 @@ static void updatePlayerPosition(float lag)
         int cvx = vx + directionDelta[goingUpDirection][0];
 
         if(level_IsSolid(cvx, vy - 1) || level_IsSolid(vx, vy - 1) || !level_IsSolid(cvx, vy))
-        {
             goingUp = false;
-        }
     }
 
     if(goingUp)
     {
-        goingUpShift += _PLAYER_FALL_SPEED * lag;
+        voff -= _PLAYER_FALL_SPEED * lag;
 
-        if(goingUpShift >= _BRICK_HEIGHT)
+        if(voff <= -(float)_BRICK_HEIGHT)
         {
             goingUp = false;
-            goingUpShift = 0.0;
 
-            playerPos.y -= _BRICK_HEIGHT;
-
+            voff = 0.0;
             vy--;
-            vx += directionDelta[goingUpDirection][0];
 
-            playerPos.x += (float)directionDelta[goingUpDirection][0] * _PLAYER_SPEED * lag;
+            hoff += (float)directionDelta[goingUpDirection][0] * _PLAYER_SPEED * lag;
         }
     }
-    else if(goingUpShift != 0.0)
+    else if(voff < 0.0)
     {
-        goingUpShift -= _PLAYER_FALL_SPEED * lag;
+        voff += _PLAYER_FALL_SPEED * lag;
 
-        if(goingUpShift < 0.0)
-            goingUpShift = 0.0;
+        if(voff > 0.0)
+            voff = 0.0;
     }
 
     /* check keystates and update position/animation accordingly */
@@ -274,8 +271,7 @@ static void updatePlayerPosition(float lag)
             return;
         }
 
-        animationSet = true;
-        changePlayerAnimation(scidPlayerDrill[playerDirection]);
+        newAnimation = scidPlayerDrill[playerDirection];
 
         /* exact point where the brick was hit */
         float hx, hy;
@@ -287,27 +283,27 @@ static void updatePlayerPosition(float lag)
             {
                 destroyed = drillField(vx, vy + directionDelta[playerDirection][1]);
 
-                hx = playerPos.x;
-                hy = vy * _BRICK_HEIGHT;
+                hx = (float)(vx * _BRICK_WIDTH) + hoff;
+                hy = (float)(vy * _BRICK_HEIGHT);
 
                 if(playerDirection == DIR_DOWN)
-                    hy += _BRICK_HEIGHT;
+                    hy += (float)_BRICK_HEIGHT;
             }
 
-            if(playerDirection == DIR_LEFT && hoff < (_HIT_DISTANCE_THRESHOLD + _PLAYER_WIDTH2))
+            if(playerDirection == DIR_LEFT && hoff < (float)(_HIT_DISTANCE_THRESHOLD + _PLAYER_WIDTH2))
             {
                 destroyed = drillField(vx - 1, vy);
 
-                hx = vx * _BRICK_WIDTH;
-                hy = vy * _BRICK_HEIGHT + _BRICK_HEIGHT / 2;
+                hx = (float)(vx * _BRICK_WIDTH);
+                hy = (float)(vy * _BRICK_HEIGHT + _BRICK_HEIGHT / 2);
             }
 
-            if(playerDirection == DIR_RIGHT && (_BRICK_WIDTH - _PLAYER_WIDTH2 - hoff) < _HIT_DISTANCE_THRESHOLD)
+            if(playerDirection == DIR_RIGHT && ((float)(_BRICK_WIDTH - _PLAYER_WIDTH2) - hoff) < (float)(_HIT_DISTANCE_THRESHOLD))
             {
                 destroyed = drillField(vx + 1, vy);
 
-                hx = (vx + 1) * _BRICK_WIDTH;
-                hy = vy * _BRICK_HEIGHT + _BRICK_HEIGHT / 2;
+                hx = (float)((vx + 1) * _BRICK_WIDTH);
+                hy = (float)(vy * _BRICK_HEIGHT + _BRICK_HEIGHT / 2);
             }
 
             if(destroyed)
@@ -333,49 +329,62 @@ static void updatePlayerPosition(float lag)
             }
 
         }
+
+        return;
     }
-    else
-        for(i = 0; i < DIR_UP; ++i)
-            if(input_IsDirPressed(i) && !slipping)
-            {
-                animationSet = true;
-                changePlayerAnimation(scidPlayerWalk[i]);
 
-                float dx = (float)directionDelta[i][0] * lag * _PLAYER_SPEED;
+    bool goUp = false;
 
-                int cvx = vx + directionDelta[i][0];
-                float cpx = playerPos.x + dx;
+    if(playerDirection == DIR_LEFT && input_IsDirPressed(DIR_LEFT))
+    {
+        newAnimation = scidPlayerWalk[DIR_LEFT];
 
-                if(level_IsSolid(cvx, vy))
-                    if(!NO_COLLISION(cpx - _PLAYER_WIDTH2, 0, _PLAYER_WIDTH, 1,  cvx * _BRICK_WIDTH, 0, _BRICK_WIDTH, 1))
-                    {
-                        if(!level_IsSolid(cvx, vy - 1) && !level_IsSolid(vx, vy - 1) && !goingUp && !goingUpTrigger)
-                        {
-                                goingUp = false;
-                                goingUpTrigger = true;
-                                goingUpShift = 0.0;
-                                goingUpDirection = i;
-                                goingUpTimer = 0.0;
-                        }
+        hoff -= lag * _PLAYER_SPEED;
 
-                        animationSet = false;
+        if(hoff < (float)_PLAYER_WIDTH2 && level_IsSolid(vx - 1, vy))
+        {
+            hoff = (float)_PLAYER_WIDTH2;
 
-                        if(i == DIR_RIGHT)
-                            playerPos.x = (float)((vx * _BRICK_WIDTH) + _BRICK_WIDTH - _PLAYER_WIDTH2);
-                        else
-                            playerPos.x = (float)((vx * _BRICK_WIDTH) + _PLAYER_WIDTH2);
+            if(!level_IsSolid(vx - 1, vy - 1))
+                goUp = true;
+        }
+    }
 
-                        break;
-                    }
+    if(playerDirection == DIR_RIGHT && input_IsDirPressed(DIR_RIGHT))
+    {
+        newAnimation = scidPlayerWalk[DIR_RIGHT];
 
-                playerPos.x += dx;
-            }
+        hoff += lag * _PLAYER_SPEED;
 
-    if(!animationSet)
-        changePlayerAnimation(scidPlayerStand[playerDirection]);
+        if(hoff > (float)(_BRICK_WIDTH - _PLAYER_WIDTH2) && level_IsSolid(vx + 1, vy))
+        {
+            hoff = (float)(_BRICK_WIDTH - _PLAYER_WIDTH2);
 
+            if(!level_IsSolid(vx + 1, vy - 1))
+                goUp = true;
+        }
+    }
 
+    if(hoff < 0.0)
+    {
+        hoff += (float)_BRICK_WIDTH;
+        vx--;
+    }
 
+    if(hoff >= (float)_BRICK_WIDTH)
+    {
+        hoff -= (float)_BRICK_WIDTH;
+        vx++;
+    }
+
+    if(goUp && !level_IsSolid(vx, vy - 1) && !goingUp && !goingUpTrigger)
+    {
+        goingUp = false;
+        goingUpTrigger = true;
+        goingUpShift = 0.0;
+        goingUpDirection = playerDirection;
+        goingUpTimer = 0.0;
+    }
 }
 
 void player_Init(int levelHeight)
@@ -405,9 +414,15 @@ void player_Init(int levelHeight)
 
     playerDirection = 3;
     player = snge_AddSprite(scidPlayerStand[playerDirection], point(0, 0), _PLAYER_LAYER);
+    newAnimation = player->sclass;
     player->relative = true;
-    playerPos = point((_MAP_WIDTH / 2) * _BRICK_WIDTH + (_BRICK_WIDTH / 2), 0);
-    viewportPos.y = - _MAP_OFFSET_Y + playerPos.y - goingUpShift;
+    player->y = - _PLAYER_SPRITE_PADDING_Y - (_PLAYER_HEIGHT - _BRICK_HEIGHT) + _MAP_OFFSET_Y;
+
+    vx = _MAP_WIDTH / 2;
+    vy = 0;
+    voff = 0.0;
+    hoff = (float)_BRICK_WIDTH / 2.0;
+    viewportPos.y = - _MAP_OFFSET_Y;
 
     goingUp = false;
     goingUpShift = false;
@@ -417,9 +432,6 @@ void player_Init(int levelHeight)
 static void collectItems()
 {
     Sprite *itemSprite;
-
-    int vx = playerPos.x / (float)_BRICK_WIDTH;
-    int vy = playerPos.y / (float)_BRICK_HEIGHT;
 
     if(level_IsAirGetAir(vx, vy, &itemSprite))
     {
@@ -438,17 +450,25 @@ void player_Frame(float lag)
     updatePlayerPosition(lag);
     collectItems();
 
+    if(player->sclass != newAnimation)
+    {
+        player->sclass = newAnimation;
+        player->frame = 0.0;
+    }
+
     float oldy = viewportPos.y;
 
+    float gY = (float)((_BRICK_HEIGHT * (mapHeight + _INTER_ROW_COUNT - 1) * level) + (_BRICK_HEIGHT * vy)) + voff;
+    float gX = (float)(_BRICK_WIDTH * vx) + hoff;
+
     viewportPos.x = - _MAP_OFFSET_X;
-    viewportPos.y = - _MAP_OFFSET_Y + playerPos.y - goingUpShift;
+    viewportPos.y = - _MAP_OFFSET_Y + gY;
 
     bcg_Move(&bcg, oldy - viewportPos.y);
 
     snge_MoveViewport(viewportPos);
 
-    player->x = playerPos.x - _PLAYER_WIDTH2 - _PLAYER_SPRITE_PADDING_X + _MAP_OFFSET_X;
-    player->y = - _PLAYER_SPRITE_PADDING_Y - (_PLAYER_HEIGHT - _BRICK_HEIGHT) + _MAP_OFFSET_Y;
+    player->x = gX - _PLAYER_WIDTH2 - _PLAYER_SPRITE_PADDING_X + _MAP_OFFSET_X;
 }
 
 void player_Cleanup()

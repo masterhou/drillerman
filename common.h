@@ -19,6 +19,10 @@
 #define SGN(X) \
         ((X > 0) ? 1 : ((X == 0) ? 0 : -1))
 
+#define FSGN(X) \
+        ((X > 0.0) ? 1.0 : ((X == 0.0) ? 0.0 : -1.0))
+
+
 typedef unsigned char bool;
 
 #define true 1
