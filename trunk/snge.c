@@ -32,23 +32,20 @@ void snge_RelativizeSprite(Sprite *sprite)
 static void sortByLayer()
 {
     int i, j;
-    int change;
     Sprite *tmp;
 
-    for(i = 0; i < (count - 1); ++i)
+    for(i = 0; i < count; ++i)
     {
-        change = 0;
+        tmp = sprites[i];
+        j = i - 1;
 
-        for(j = 0; j < (count - 1 - i); ++j)
-            if(sprites[j + 1]->layer < sprites[j]->layer)
-            {
-                tmp = sprites[j + 1];
-                sprites[j + 1] = sprites[j];
-                sprites[j] = tmp;
-                change = 1;
-            }
+        while(j >= 0 && sprites[i]->layer > tmp->layer)
+        {
+            sprites[j + 1] = sprites[j];
+            j--;
+        }
 
-        if(!change) return;
+        sprites[j + 1] = tmp;
     }
 
 }

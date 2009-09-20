@@ -3,6 +3,7 @@
 
 #include "defs.h"
 #include "snge.h"
+#include "common.h"
 
 typedef struct
 {
@@ -17,6 +18,7 @@ typedef struct
 {
     BcgLayer layers[_BCG_LAYER_COUNT];
     float vShift;
+    bool slideOut;
 }  Bcg;
 
 Bcg bcg_Create(float vShift, int levelNum);
