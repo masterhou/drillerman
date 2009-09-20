@@ -394,6 +394,7 @@ void player_Init(int levelHeight)
     levelAdvanceFalling = false;
 
     bcg = bcg_Create(0, 0);
+    bcg.slideOut = true;
     level_Init(mapHeight);
 
     int i;

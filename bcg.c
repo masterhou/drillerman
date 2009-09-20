@@ -9,6 +9,8 @@ Bcg bcg_Create(float vShift, int levelNum)
     int i, j;
     Bcg bcg;
 
+    bcg.slideOut = false;
+
     for(i = 0; i < _BCG_LAYER_COUNT; ++i)
     {
         SpriteClassId scid = sprites_GetIdByNameF("level_%d:bcg-layer-%d", levelNum, i);
@@ -48,18 +50,22 @@ void bcg_Move(Bcg *pBcg, float vdelta)
         float pfactor = 1.0 - ((float)(_BCG_LAYER_COUNT - i) * _BCG_PARALLAX_FACTOR);
 
         for(j = 0; j < l->count; ++j)
+        {
             l->sprites[j]->y += vdelta * pfactor;
+        }
+
+        if(pBcg->slideOut)
+            continue;
 
         float bottomy = l->sprites[l->bottom]->y + l->height;
 
         if(bottomy <= _SCREEN_HEIGHT)
         {
             int newbottom = (l->bottom + 1) % l->count;
-            l->sprites[newbottom]->y = bottomy;
             l->bottom = newbottom;
+            l->sprites[newbottom]->y = bottomy;
         }
     }
-
 }
 
 void bcg_Cleanup(Bcg *pBcg)
