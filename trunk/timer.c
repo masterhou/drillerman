@@ -5,6 +5,8 @@
 
 #include "common.h"
 
+/* THIS MODULE IS DEFUNCT */
+
 /*
     This module implements non-callback
     non-threaded timers tied to the frame

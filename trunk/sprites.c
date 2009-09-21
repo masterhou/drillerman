@@ -66,8 +66,8 @@ void sprites_LoadFromCfg(const char *cfgpathrel, const char *namePrefix)
 
         message_OutEmfEx("Internal sprite class name: %s\n", sc->name);
 
-        sc->areverse = cfg_GetTag("reverse");
-        sc->arepeat = cfg_GetTag("repeat");
+        sc->areverse = cfg_GetBool("reverse");
+        sc->arepeat = cfg_GetBool("repeat");
 
         cfg_GetIntValue("frames", &sc->fcount);
 

@@ -11,12 +11,28 @@ static FILE* cfgfile = NULL;
 static long section_offset = 0;
 
 static void separateValue(char* str);
-static int checkPattern(char* pattern, char* str);
+static bool checkPattern(char* pattern, char* str);
 
-static int checkPattern(char *pattern, char *str)
+static void trimString(char *str)
+{
+    register char *start = str;
+    register char *end = str + strlen(str) - 1;
+
+    while(*start == ' ') start++;
+
+    while(*end == '\n' || *end == ' ' || *end == '\r' && end != start) end--;
+
+    unsigned int sz = end - start + 1;
+
+    memmove(str, start, sz);
+
+    str[sz] = '\0';
+}
+
+static bool checkPattern(char *pattern, char *str)
 {
 
-    if((strlen(pattern) < 1) || (strlen(str) < 1)) return 0;
+    if((strlen(pattern) == 0) || (strlen(str) == 0)) return 0;
 
     int i, j;
 
@@ -28,9 +44,9 @@ static int checkPattern(char *pattern, char *str)
 
     while((str[i] != '\0') && (pattern[j] != '\0') && (str[i] == pattern[j])) i++,j++;
 
-    if(j == strlen(pattern)) return 1;
+    if(j == strlen(pattern)) return true;
 
-    return 0;
+    return false;
 
 }
 
@@ -63,13 +79,16 @@ static void separateValue(char *str)
 
 
 
-int cfg_Open(const char *filepath)
+bool cfg_Open(const char *filepath)
 {
 
     if((cfgfile = fopen(filepath, "r")) == NULL)
+    {
         message_CriticalErrorEx("config: Could not open file '%s'.\n", filepath);
+        return false;
+    }
 
-    return 1;
+    return true;
 } 
 
 void cfg_Close()
@@ -82,14 +101,14 @@ void cfg_Close()
 
 }
 
-int cfg_SeekSection(char *section_name)
+bool cfg_SeekSection(char *sectionName)
 {
 
     char buffer[_STR_BUFLEN];
     char pattern[_STR_BUFLEN];
-    int found = 0;
+    bool found = false;
 
-    sprintf(pattern, "[%s]", section_name);
+    sprintf(pattern, "[%s]", sectionName);
 
     rewind(cfgfile);
 
@@ -99,21 +118,20 @@ int cfg_SeekSection(char *section_name)
     if(found)
     {
         section_offset = ftell(cfgfile);
-        return 1;
+        return true;
     }
 
     message_WarningEx("config: Could not find section '%s'.\n", pattern);
 
-    return 0;
+    return false;
 
 }
 
-int cfg_NextSection(char *section_name)
+bool cfg_NextSection(char *sectionName)
 {
-
     char buffer[_STR_BUFLEN];
     char pattern[_STR_BUFLEN];
-    int found = 0;
+    int found = false;
 
     sprintf(pattern, "[");
 
@@ -124,109 +142,123 @@ int cfg_NextSection(char *section_name)
     {
         char *start = buffer + 1;
         char *end = strrchr(start, ']') - 1;
-        memcpy(section_name, start, end - start + 1);
-
-
-        section_name[end - start + 1] = '\0';
-
+        memcpy(sectionName, start, end - start + 1);
+        sectionName[end - start + 1] = '\0';
         section_offset = ftell(cfgfile);
-        return 1;
+        return true;
     }
 
-    return 0;
-
+    return false;
 }
 
-int cfg_GetIntValue(char *valueName, int *value)
+bool cfg_GetIntValue(char *propertyName, int *value)
 {
 
     char buffer[_STR_BUFLEN];
 
-    if(cfg_GetStringValue(valueName, buffer))
+    if(cfg_GetStringValue(propertyName, buffer))
     {
         int val;
         if(sscanf(buffer, "%d", &val) < 1)
         {
-            message_WarningEx("config: The value '%s=%s' is not an integer.\n", valueName, buffer);
-            return 0;
+            message_WarningEx("config: The value '%s=%s' is not an integer.\n", propertyName, buffer);
+            return false;
         }
 
         *value = val;
-        return 1;
+        return true;
     }
 
-    message_WarningEx("config: Could not find value '%s' within current section.\n", valueName);
+    message_WarningEx("config: Could not find value '%s' within current section.\n", propertyName);
 
-    return 0;
-
+    return false;
 }
 
-int cfg_GetDoubleValue(char *value_name, double *value)
+bool cfg_GetDoubleValue(char *propertyName, double *value)
 {
 
-    char buffer[256];
+    char buffer[_STR_BUFLEN];
 
-    if(cfg_GetStringValue(value_name, buffer))
+    if(cfg_GetStringValue(propertyName, buffer))
     {
 
         double val;
 
         if(sscanf(buffer, "%lf", &val) < 1)
         {
-            message_WarningEx("config: The value '%s=%s' is not a double.\n", value_name, buffer);
-            return 0;
+            message_WarningEx("config: The value '%s=%s' is not a double.\n", propertyName, buffer);
+            return false;
         }
 
         *value = val;
-        return 1;
+        return true;
     }
 
-    message_WarningEx("config: Could not find value '%s' within current section.\n", value_name);
-    return 0;
+    message_WarningEx("config: Could not find value '%s' within current section.\n", propertyName);
+    return false;
 
 }
 
-int cfg_GetStringValue(char *value_name, char *str)
+bool cfg_FindPattern(char *pattern, char *buffer)
 {
-
-    char buffer[_STR_BUFLEN];
-    char pattern[_STR_BUFLEN];
-    int found = 0;
-
-    sprintf(pattern, "%s=", value_name);
+    bool found = false;
 
     fseek(cfgfile, section_offset, SEEK_SET);
-
-
-    do fgets(buffer, _STR_BUFLEN, cfgfile);
-    while(!feof(cfgfile) && !checkPattern("[", buffer) && !(found = checkPattern(pattern, buffer)));
-
-    if(found)
-    {
-        separateValue(buffer);
-        strcpy(str, buffer);
-
-        return 1;
-    }
-
-    message_WarningEx("config: Could not find value '%s' within current section.\n", value_name);
-    return 0;
-}
-
-int cfg_GetTag(char *tag_name)
-{
-    char buffer[_STR_BUFLEN];
-    char pattern[_STR_BUFLEN];
-    int found = 0;
-
-    sprintf(pattern, "%s=", tag_name);
-
-    fseek(cfgfile, section_offset, SEEK_SET);
-
 
     do fgets(buffer, _STR_BUFLEN, cfgfile);
     while(!feof(cfgfile) && !checkPattern("[", buffer) && !(found = checkPattern(pattern, buffer)));
 
     return found;
+}
+
+bool cfg_GetStringValue(char *propertyName, char *str)
+{
+
+    char buffer[_STR_BUFLEN];
+    char pattern[_STR_BUFLEN];
+
+    sprintf(pattern, "%s=", propertyName);
+
+    if(cfg_FindPattern(pattern, buffer))
+    {
+        separateValue(buffer);
+        trimString(buffer);
+        strcpy(str, buffer);
+        return true;
+    }
+
+    message_WarningEx("config: Could not find value '%s' within current section.\n", propertyName);
+    return false;
+}
+
+bool cfg_GetTag(char *tagName)
+{
+    char buffer[_STR_BUFLEN];
+    char pattern[_STR_BUFLEN];
+
+    sprintf(pattern, "+%s", tagName);
+
+    return cfg_FindPattern(pattern, buffer);
+}
+
+bool cfg_GetBool(char *propertyName)
+{
+    char buffer[_STR_BUFLEN];
+    char pattern[_STR_BUFLEN];
+
+    sprintf(pattern, "%s=", propertyName);
+
+    if(cfg_FindPattern(pattern, buffer))
+    {
+        separateValue(buffer);
+        trimString(buffer);
+
+        if(strcmp(buffer, "1") != 0 || strcmp(buffer, "yes") != 0 ||
+           strcmp(buffer, "y") != 0 || strcmp(buffer, "true") != 0 ||
+           strcmp(buffer, "t") != 0)
+            return true;
+    }
+
+    return false;
 }
 
