@@ -152,6 +152,13 @@ static void updatePlayerPosition(float lag)
             levelAdvanceFalling = false;
             vy = 0;
             level++;
+
+            bcg_Cleanup(&bcg);
+            bcg = bcgNext;
+            bcg_Relativize(&bcg);
+
+            if((level + 1) < _LEVEL_COUNT)
+                bcgNext = bcg_Create(level_GetOffset(level + 1) - (float)_MAP_OFFSET_Y, level + 1);
         }
 
         return;
@@ -393,9 +400,11 @@ void player_Init(int levelHeight)
     level = 0;
     levelAdvanceFalling = false;
 
-    bcg = bcg_Create(0, 0);
-    bcg.slideOut = true;
     level_Init(mapHeight);
+
+    bcg = bcg_Create(0, 0);
+    bcg_Relativize(&bcg);
+    bcgNext = bcg_Create(level_GetOffset(1) - (float)_MAP_OFFSET_Y, 1);
 
     int i;
 

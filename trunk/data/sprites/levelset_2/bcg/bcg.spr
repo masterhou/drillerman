@@ -10,4 +10,7 @@ frame(1)=bcglayer2.png
 frames=1
 frame(1)=bcglayer3.png
 
+[bcg-start]
+frames=1
+frame(1)=bcgstart.png
 

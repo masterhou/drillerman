@@ -7,9 +7,17 @@
 Bcg bcg_Create(float vShift, int levelNum)
 {
     int i, j;
+    int baseLayer = levelNum * _BCG_LAYER_COUNT;
     Bcg bcg;
 
     bcg.slideOut = false;
+
+    int tw, th;
+    SpriteClassId startScid = sprites_GetIdByNameF("level_%d:bcg-start", levelNum);
+    sprites_GetDimensions(startScid, &tw, &th);
+
+    bcg.startImg = snge_AddSprite(startScid, point(0.0, vShift), baseLayer + _BCG_LAYER_COUNT);
+    bcg.startImgHeight = (float)th;
 
     for(i = 0; i < _BCG_LAYER_COUNT; ++i)
     {
@@ -27,8 +35,7 @@ Bcg bcg_Create(float vShift, int levelNum)
 
         for(j = 0; j < count; ++j)
         {
-            sprites[j] = snge_AddSprite(scid, point(xpos, (j - 1) * height + vShift), i);
-            sprites[j]->relative = true;
+            sprites[j] = snge_AddSprite(scid, point(xpos, j * height + vShift), baseLayer + i);
         }
 
         bcg.layers[i].bottom = count - 1;
@@ -38,6 +45,20 @@ Bcg bcg_Create(float vShift, int levelNum)
     }
 
     return bcg;
+}
+
+void bcg_Relativize(Bcg *pBcg)
+{
+    int i, j;
+
+    for(i = 0; i < _BCG_LAYER_COUNT; ++i)
+    {
+        BcgLayer *l = &pBcg->layers[i];
+        for(j = 0; j < l->count; ++j)
+            snge_RelativizeSprite(l->sprites[j]);
+    }
+
+    snge_RelativizeSprite(pBcg->startImg);
 }
 
 void bcg_Move(Bcg *pBcg, float vdelta)
@@ -66,10 +87,24 @@ void bcg_Move(Bcg *pBcg, float vdelta)
             l->sprites[newbottom]->y = bottomy;
         }
     }
+
+    if(pBcg->startImg == NULL)
+        return;
+
+    pBcg->startImg->y += vdelta;
+
+    if((pBcg->startImg->y + pBcg->startImgHeight) <= 0.0)
+    {
+        pBcg->startImg->destroy = true;
+        pBcg->startImg = NULL;
+    }
 }
 
 void bcg_Cleanup(Bcg *pBcg)
 {
+    if(pBcg->startImg != NULL)
+        pBcg->startImg->destroy = true;
+
     int i, j;
     for(i = 0; i < _BCG_LAYER_COUNT; ++i)
     {
