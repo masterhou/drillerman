@@ -87,6 +87,12 @@ static float vShift;
 
 static bool needShapeUpdate;
 
+
+float level_GetOffset(int levelNum)
+{
+    return (float)(_BRICK_HEIGHT * (_INTER_ROW_COUNT + mapHeight - 1) * levelNum);
+}
+
 void level_Advance(int hitx, int nextLevel)
 {
     interAreaHit(hitx, 0);
@@ -142,7 +148,7 @@ void level_Advance(int hitx, int nextLevel)
         }
 
     /* -1 because first row of every map is empty so the player can start there */
-    float vertShift = (float)(_BRICK_HEIGHT * (_INTER_ROW_COUNT + mapHeight - 1));
+    float vertShift = level_GetOffset(nextLevel);
 
     allocSprites(maps[nextLevel], scids[nextLevel], vertShift);
 
@@ -454,7 +460,7 @@ static void allocSprites(MapField **tMap, LevelSpriteClasses *pScids, float vert
 inline static float getShakeShift(int y)
 {
     float pos = (float)y / (float)_VISIBLE_ROWS;
-    return _SHAKE_MAX_SHIFT * sinf((pos - truncf(pos)) * 2.0 * M_PI);
+    return _SHAKE_MAX_SHIFT * sinf(pos * 4.0 * M_PI);
 }
 
 inline static void pushAdjacentSameBricks(Stack *pstack, IntPoint bp, FieldType ftype)

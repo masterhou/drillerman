@@ -34,12 +34,12 @@ static void sortByLayer()
     int i, j;
     Sprite *tmp;
 
-    for(i = 0; i < count; ++i)
+    for(i = 1; i < count; ++i)
     {
         tmp = sprites[i];
         j = i - 1;
 
-        while(j >= 0 && sprites[i]->layer > tmp->layer)
+        while(j >= 0 && sprites[j]->layer > tmp->layer)
         {
             sprites[j + 1] = sprites[j];
             j--;

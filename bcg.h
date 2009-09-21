@@ -19,10 +19,13 @@ typedef struct
     BcgLayer layers[_BCG_LAYER_COUNT];
     float vShift;
     bool slideOut;
+    Sprite *startImg;
+    float startImgHeight;
 }  Bcg;
 
 Bcg bcg_Create(float vShift, int levelNum);
 void bcg_Move(Bcg *pBcg, float vdelta);
 void bcg_Cleanup(Bcg *pBcg);
+void bcg_Relativize(Bcg *pBcg);
 
 #endif
