@@ -15,7 +15,7 @@
     property_name=value
 
     with no whitespace between property name and the
-    equal sign.
+    equal sign. Values are whitespace-trimmed.
 
     You can use tags:
 
@@ -38,6 +38,7 @@ bool cfg_GetIntValue(char *value_name, int *value);
 bool cfg_GetDoubleValue(char *value_name, double *value);
 bool cfg_GetStringValue(char *value_name, char *str);
 bool cfg_GetTag(char *tag_name);
+bool cfg_GetBool(char *propertyName);
 
 #endif
 

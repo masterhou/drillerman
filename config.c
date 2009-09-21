@@ -20,7 +20,7 @@ static void trimString(char *str)
 
     while(*start == ' ') start++;
 
-    while(*end == '\n' || *end == ' ' || *end == '\r' && end != start) end--;
+    while((*end == '\n' || *end == ' ' || *end == '\r') && (end != start)) end--;
 
     unsigned int sz = end - start + 1;
 
@@ -31,50 +31,42 @@ static void trimString(char *str)
 
 static bool checkPattern(char *pattern, char *str)
 {
+    register char *cs = str;
+    register char *cp = pattern;
 
-    if((strlen(pattern) == 0) || (strlen(str) == 0)) return 0;
+    while(*cs == ' ') cs++;
 
-    int i, j;
+    while(*cs != '\0' && *cp != '\0' && *cp == *cs) cp++,cs++;
 
-    i = 0;
-
-    while((str[i] == ' ') && (str[i] != '\0')) ++i;
-
-    j = 0;
-
-    while((str[i] != '\0') && (pattern[j] != '\0') && (str[i] == pattern[j])) i++,j++;
-
-    if(j == strlen(pattern)) return true;
+    if((cp - pattern) == strlen(pattern))
+        return true;
 
     return false;
-
 }
 
 static void separateValue(char *str)
 {
+    register char *cs = str;
 
-    int i, j;
+    while(*cs != '=' && *cs != '\0') cs++;
 
-    i = 0;
-
-    while(str[i] != '=') ++i;
-
-    if(i == strlen(str))
+    if(*cs == '\0')
     {
         message_WarningEx("config: Could not find value in '%s'.\n", str);
         return;
     }
 
-    j = 0;
+    cs++;
 
-    while(str[i] != '\n' && str[i] != 0 && str[i] != ' ' )
+    register char *cr = str;
+
+    while(*cs != '\n' && *cs != '\0' && *cs != '\r')
     {
-        ++i;
-        str[j] = str[i];
-        ++j;
+        *cr = *cs;
+        cs++,cr++;
     }
 
-    str[j - 1] = '\0';
+    *cr = '\0';
 }
 
 
