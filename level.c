@@ -90,6 +90,7 @@ static bool needShapeUpdate;
 
 float level_GetOffset(int levelNum)
 {
+    /* -1 because first row of every map is empty so the player can start there */
     return (float)(_BRICK_HEIGHT * (_INTER_ROW_COUNT + mapHeight - 1) * levelNum);
 }
 
@@ -147,7 +148,6 @@ void level_Advance(int hitx, int nextLevel)
             }
         }
 
-    /* -1 because first row of every map is empty so the player can start there */
     float vertShift = level_GetOffset(nextLevel);
 
     allocSprites(maps[nextLevel], scids[nextLevel], vertShift);
