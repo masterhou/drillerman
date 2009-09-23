@@ -1,5 +1,6 @@
 #include "generator.h"
 
+
 #include <stdlib.h>
 #include <time.h>
 
@@ -8,7 +9,7 @@ typedef struct
     int airPeriodMin;
     int airPeriodMax;
     float airCratedProbability[3][3];
-    float sameColorFactor;
+    float sameColorProbability;
     float colorProbability[VF_BRICK_COUNT];
 } GenerationParams;
 
@@ -22,8 +23,8 @@ static GenerationParams gps[_LEVEL_COUNT] = {
                 {0.3, 0.0, 0.3},
                 {0.1, 0.3, 0.1}
             },
-        sameColorFactor: 1.0,
-        colorProbability: {0.4, 0.3, 0.2, 0.1}
+        sameColorProbability: 0.00,
+        colorProbability: {0.3, 0.3, 0.3, 0.3}
     },
     {
         airPeriodMin: 6,
@@ -33,8 +34,8 @@ static GenerationParams gps[_LEVEL_COUNT] = {
                 {0.3, 0.0, 0.3},
                 {0.1, 0.3, 0.1}
             },
-        sameColorFactor: 1.0,
-        colorProbability: {0.4, 0.3, 0.2, 0.1}
+        sameColorProbability: 0.00,
+        colorProbability: {0.3, 0.3, 0.3, 0.3}
     }
 };
 
@@ -56,28 +57,42 @@ void generator_AllocMap(FieldType ***pmap, int height, int level)
             map[x][y] = VF_NONE;
 
     for(y = 0; y < height; ++y)
+    {
         for(x = 0; x < width; ++x)
-            do
+        {
+            while(map[x][y] == VF_NONE)
             {
-        FieldType vf = common_RandI() % VF_BRICK_COUNT;
+                if(y > 0)
+                {
+                    FieldType vf = map[x][y - 1];
 
-        int is_there = 0;
+                    if(common_RandD() < (gp.sameColorProbability * gp.colorProbability[vf]))
+                    {
+                        map[x][y] = vf;
+                        continue;
+                    }
+                }
 
-        if(y > 0)
-            if(map[x][y - 1] == vf)
-                is_there = 1;
-        if(x > 0)
-            if(map[x - 1][y] == vf)
-                is_there = 1;
+                if(x > 0)
+                {
+                    FieldType vf = map[x - 1][y];
 
-        map[x][y] = vf;
+                    if(common_RandD() < (gp.sameColorProbability * gp.colorProbability[vf]))
+                    {
+                        map[x][y] = vf;
+                        continue;
+                    }
+                }
 
-        if(is_there && common_RandD() >= gp.sameColorFactor)
-            map[x][y] = VF_NONE;
-        if(common_RandD() >= gp.colorProbability[vf])
-            map[x][y] = VF_NONE;
 
-    } while(map[x][y] == VF_NONE);
+                map[x][y] = common_RandI() % VF_BRICK_COUNT;
+
+                if(common_RandD() >= gp.colorProbability[map[x][y]])
+                    map[x][y] = VF_NONE;
+            }
+
+        }
+    }
 
     y = 0;
 

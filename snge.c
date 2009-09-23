@@ -162,6 +162,14 @@ void snge_CleanupSprites()
     sprites = stmp;
 }
 
+void snge_SwitchAnim(Sprite *pSprite, SpriteClassId scid)
+{
+    pSprite->sclass = scid;
+    pSprite->frame = 0.0;
+    pSprite->aended = false;
+    pSprite->animdir = 1.0;
+}
+
 void snge_UpdateAnim(float lag)
 {
     int i;
@@ -174,7 +182,7 @@ void snge_UpdateAnim(float lag)
         int fc = sc->fcount;
         double fps = sc->fps;
 
-        if(sp->angle > 360)
+        if(sp->angle > 360.0)
             sp->angle = fmodf(sp->angle, 360.0);
 
         if(sc->ssc == SSC_ANIM)
@@ -202,10 +210,15 @@ void snge_UpdateAnim(float lag)
 
             }
 
-            if(sp->frame < 0)
+            if(sp->frame <= 0.0)
             {
+                /* If animation is reversed but not repeated then signal end
+                   once it was reversed and is back to first frame. */
+                if(sc->areverse && sp->animdir < 0.0 && !sc->arepeat)
+                    sp->aended = true;
+
                 sp->animdir = 1.0;
-                sp->frame -= delta;
+                sp->frame = -sp->frame;
             }
         }
 

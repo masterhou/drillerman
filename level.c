@@ -142,6 +142,7 @@ void level_Advance(int hitx, int nextLevel)
 
                 particles_SetFading(p, _LEVEL_ADVANCE_FADE_SPEED, true);
                 particles_SetVelocityFromNormalizedVector(p, vector, _LEVEL_ADVANCE_VELOCITY);
+                particles_SetFlag(p, PF_GRAVITY_AFFECTED);
 
                 f->type = VF_NONE;
                 f->sprite = NULL;

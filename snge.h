@@ -46,5 +46,6 @@ Point snge_GetTextSize(Sprite *psprite);
 void snge_MoveViewport(Point newpos);
 void snge_RelativizeSprite(Sprite *sprite);
 void snge_CleanupSprites();
+void snge_SwitchAnim(Sprite *pSprite, SpriteClassId scid);
 
 #endif
