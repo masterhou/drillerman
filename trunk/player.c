@@ -27,12 +27,13 @@ static SpriteClassId scidPlayerFall;
 
 static SpriteClassId scidDrillParticle;
 
+static SpriteClassId scidLastDrill;
+
 static Point viewportPos;
 
 static int mapHeight;
 static int mapWidth = _MAP_WIDTH;
 
-static Point playerPos;
 static Direction playerDirection;
 
 static Sprite *player;
@@ -45,7 +46,9 @@ static float goingUpShift;
 static Direction goingUpDirection;
 static float goingUpTimer;
 static bool levelAdvanceFalling;
-static float levelAdvanceDistance;
+
+static float drillDelayTimer;
+static bool drillSched;
 
 static Bcg bcg;
 static Bcg bcgNext;
@@ -164,7 +167,8 @@ static void updatePlayerPosition(float lag)
         return;
     }
 
-    newAnimation = scidPlayerStand[playerDirection];
+    if(player->sclass != scidLastDrill || player->aended)
+        newAnimation = scidPlayerStand[playerDirection];
 
     bool hasSupport;
     Direction leanOutDirection;
@@ -270,15 +274,32 @@ static void updatePlayerPosition(float lag)
 
     /* check keystates and update position/animation accordingly */
 
+
     if(input_IsKeyPressed(KEY_DRILL))
     {
+        newAnimation = scidPlayerDrill[playerDirection];
+        scidLastDrill = newAnimation;
+
+        if(!drillSched)
+        {
+            drillSched = true;
+            drillDelayTimer = 0.0;
+            return;
+        }
+    }
+
+    if(drillSched)
+        drillDelayTimer += lag;
+
+    if(drillSched && drillDelayTimer >= _PLAYER_DRILL_DELAY)
+    {
+        drillSched = false;
+
         if(vy == (mapHeight - 1) && voff == 0.0 && playerDirection == DIR_DOWN)
         {
             advanceLevel(vx);
             return;
         }
-
-        newAnimation = scidPlayerDrill[playerDirection];
 
         /* exact point where the brick was hit */
         float hx, hy;
@@ -344,8 +365,6 @@ static void updatePlayerPosition(float lag)
 
     if(playerDirection == DIR_LEFT && input_IsDirPressed(DIR_LEFT))
     {
-        newAnimation = scidPlayerWalk[DIR_LEFT];
-
         hoff -= lag * _PLAYER_SPEED;
 
         if(hoff < (float)_PLAYER_WIDTH2 && level_IsSolid(vx - 1, vy))
@@ -355,12 +374,12 @@ static void updatePlayerPosition(float lag)
             if(!level_IsSolid(vx - 1, vy - 1))
                 goUp = true;
         }
+        else
+            newAnimation = scidPlayerWalk[DIR_LEFT];
     }
 
     if(playerDirection == DIR_RIGHT && input_IsDirPressed(DIR_RIGHT))
     {
-        newAnimation = scidPlayerWalk[DIR_RIGHT];
-
         hoff += lag * _PLAYER_SPEED;
 
         if(hoff > (float)(_BRICK_WIDTH - _PLAYER_WIDTH2) && level_IsSolid(vx + 1, vy))
@@ -370,6 +389,8 @@ static void updatePlayerPosition(float lag)
             if(!level_IsSolid(vx + 1, vy - 1))
                 goUp = true;
         }
+        else
+            newAnimation = scidPlayerWalk[DIR_RIGHT];
     }
 
     if(hoff < 0.0)
@@ -437,6 +458,10 @@ void player_Init(int levelHeight)
     goingUp = false;
     goingUpShift = false;
     goingUpTrigger = false;
+
+    scidLastDrill = scidPlayerDrill[DIR_UP];
+    drillDelayTimer = 0.0;
+    drillSched = false;
 }
 
 static void collectItems()
@@ -461,10 +486,7 @@ void player_Frame(float lag)
     collectItems();
 
     if(player->sclass != newAnimation)
-    {
-        player->sclass = newAnimation;
-        player->frame = 0.0;
-    }
+        snge_SwitchAnim(player, newAnimation);
 
     float oldy = viewportPos.y;
 

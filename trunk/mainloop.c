@@ -87,8 +87,8 @@ static float getFps(float lag)
     for(i = 0; i < _FPS_ITEM_COUNT; ++i)
         cfps += fps[i] / (float)_FPS_ITEM_COUNT;
 
-    if(fpsItem == 0)
-        message_OutEx("FPS: %f\n", cfps);
+    //if(fpsItem == 0)
+      //  message_OutEx("FPS: %f\n", cfps);
 
     return cfps;
 }

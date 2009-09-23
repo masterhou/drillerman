@@ -162,9 +162,7 @@ void sprites_LoadFontsFromCfg(char *cfgpathrel)
 
         incrementClassCount();
 
-        int s = count - 1;
-
-        SpriteClass *sc = &classes[s];
+        SpriteClass *sc = &classes[count - 1];
 
         sc->name = malloc(strlen(name) + 1);
 
