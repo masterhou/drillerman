@@ -8,6 +8,11 @@ typedef struct
 {
     int airPeriodMin;
     int airPeriodMax;
+    int airRowMax;
+    int cratePeriodMin;
+    int cratePeriodMax;
+    int crateRowMax;
+    int cratePassCount;
     int maxLength;
     float airCratedProbability[3][3];
     float sameColorProbability;
@@ -19,26 +24,54 @@ static GenerationParams gps[_LEVEL_COUNT] = {
     {
         airPeriodMin: 6,
         airPeriodMax: 10,
+        airRowMax: 2,
+        cratePeriodMin: 3,
+        cratePeriodMax: 10,
+        crateRowMax: 4,
+        cratePassCount: 3,
         airCratedProbability: {
                 {0.1, 0.2, 0.1},
                 {0.3, 0.0, 0.3},
                 {0.1, 0.3, 0.1}
             },
-        sameColorProbability: 0.00,
         maxLength: 1
     },
     {
         airPeriodMin: 6,
         airPeriodMax: 10,
+        airRowMax: 2,
+        cratePeriodMin: 2,
+        cratePeriodMax: 10,
+        crateRowMax: 4,
+        cratePassCount: 2,
         airCratedProbability: {
                 {0.1, 0.2, 0.1},
                 {0.3, 0.0, 0.3},
                 {0.1, 0.3, 0.1}
             },
-        sameColorProbability: 0.00,
-        maxLength: 10
-    }
+        maxLength: 1
+    },
 };
+
+static void generateBrickVPeriods(FieldType ft, int vPrMin, int vPrMax, int rowMax, int width, int height, FieldType **map)
+{
+    int x, y, i;
+
+    y = 0;
+    y += (common_RandI() % (vPrMax - vPrMin + 1)) + vPrMin;
+
+    while(y < height)
+    {
+        int hCount = common_RandI() % rowMax + 1;
+
+        for(i = 0; i < hCount; ++i)
+        {
+            do { x = common_RandI() % width; } while(map[x][y] == ft);
+            map[x][y] = ft;
+        }
+        y += (common_RandI() % (vPrMax - vPrMin + 1)) + vPrMin;
+    }
+}
 
 
 void generator_AllocMap(FieldType ***pmap, int height, int level)
@@ -125,22 +158,19 @@ void generator_AllocMap(FieldType ***pmap, int height, int level)
         count += len;
     }
 
-    y = 0;
+    generateBrickVPeriods(VF_AIR, gp.airPeriodMin, gp.airPeriodMax, gp.airRowMax, width, height, map);
 
-    /* place air and crates around it */
+    for(i = 0; i < gp.cratePassCount; ++ i)
+        generateBrickVPeriods(VF_CRATE, gp.cratePeriodMin, gp.cratePeriodMax, gp.airRowMax, width, height, map);
 
-    while(y < height)
-    {
-        x = common_RandI() % width;
-        map[x][y] = VF_AIR;
-
-        for(j = -1; j <= 1; ++j)
-            for(i = -1; i <= 1; ++i)
-                if(INBOUND(x + i, y + j, width, height) &&
-                   common_RandD() < gp.airCratedProbability[j + 1][i + 1])
-                    map[x + i][y + j] = VF_CRATE;
-        y += (common_RandI() % (gp.airPeriodMax - gp.airPeriodMin + 1)) + gp.airPeriodMin;
-    }
+    for(y = 0; y < height; ++y)
+        for(x = 0; x < width; ++x)
+            if(map[x][y] == VF_AIR)
+                for(j = -1; j <= 1; ++j)
+                    for(i = -1; i <= 1; ++i)
+                        if(INBOUND(x + i, y + j, width, height) &&
+                           common_RandD() < gp.airCratedProbability[j + 1][i + 1])
+                            map[x + i][y + j] = VF_CRATE;
 
     *pmap = map;
 
