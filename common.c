@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 void common_GetBasePath(const char *input, char *output)
 {
@@ -21,12 +22,12 @@ void common_GetBasePath(const char *input, char *output)
 
 double common_RandD()
 {
-    return (double)rand() / (double)(RAND_MAX);
+    return (double)random() / (double)(RAND_MAX);
 }
 
 int common_RandI()
 {
-    return (double)rand() / (double)(RAND_MAX) * 100.0;
+    return random();
 }
 
 void **common_Alloc2DTable(int w, int h, unsigned int elsz)
@@ -62,5 +63,10 @@ inline Color color(float r, float g, float b, float a)
 {
     Color c = {r: r, g: g, b: b, a: a};
     return c;
+}
+
+void common_Init()
+{
+    srandom(time(NULL));
 }
 

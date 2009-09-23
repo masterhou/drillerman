@@ -74,5 +74,7 @@ int common_RandI();
 void common_Free2DTable(void **table, int w);
 void **common_Alloc2DTable(int w, int h, unsigned int elsz);
 
+void common_Init();
+
 #endif
 
