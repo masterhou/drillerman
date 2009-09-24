@@ -46,8 +46,12 @@ int main(int argc, char **argv)
 {
     message_OutEx("Data path is set to '%s'\n", _DATA_PATH);
 
-    xScrRatio = (float)screenWidth / (float)_SCREEN_WIDTH;
-    yScrRatio = (float)screenHeight / (float)_SCREEN_HEIGHT;
+    /*xScrRatio = (float)screenWidth / (float)_SCREEN_WIDTH;
+    yScrRatio = (float)screenHeight / (float)_SCREEN_HEIGHT;*/
+    float tmpRatio = (float)screenWidth / (float)_SCREEN_WIDTH;
+
+    xScrRatio = tmpRatio;
+    yScrRatio = tmpRatio;
 
     readConfiguration();
 
