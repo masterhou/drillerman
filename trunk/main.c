@@ -19,8 +19,6 @@ int screenHeight = _SCREEN_HEIGHT;
 
 int enableFullscreen = 0;
 int filteringType = 0;
-float xScrRatio;
-float yScrRatio;
 
 static void readConfiguration()
 {
@@ -46,13 +44,6 @@ int main(int argc, char **argv)
 {
     message_OutEx("Data path is set to '%s'\n", _DATA_PATH);
 
-    /*xScrRatio = (float)screenWidth / (float)_SCREEN_WIDTH;
-    yScrRatio = (float)screenHeight / (float)_SCREEN_HEIGHT;*/
-    float tmpRatio = (float)screenWidth / (float)_SCREEN_WIDTH;
-
-    xScrRatio = tmpRatio;
-    yScrRatio = tmpRatio;
-
     readConfiguration();
 
     SDL_Surface* screen;
@@ -69,7 +60,7 @@ int main(int argc, char **argv)
 
 
     common_Init();
-    graphicsInitSubsytem(_SCREEN_WIDTH, _SCREEN_HEIGHT);
+    graphicsInitSubsytem(screenWidth, screenHeight);
     input_Init();
     sprites_Init();
     snge_Init();
