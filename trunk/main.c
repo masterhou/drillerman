@@ -58,9 +58,8 @@ int main(int argc, char **argv)
 
     SDL_WM_SetCaption("D-Man", NULL);
 
-
     common_Init();
-    graphicsInitSubsytem(screenWidth, screenHeight);
+    graphics_Init(screenWidth, screenHeight);
     input_Init();
     sprites_Init();
     snge_Init();

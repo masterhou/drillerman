@@ -112,12 +112,12 @@ void gloutInitSubsystem(int setScreenWidth, int setScreenHeight)
 
 }
 
-void gloutSetBackground(FillType bt, Color main_color, Color aux_color, GradientType gt)
+void gloutSetBackground(FillType bt, Color mainColor, Color auxColor, GradientType gt)
 {
     bgType = bt;
     bgGradient = gt;
-    bgColor1 = main_color;
-    bgColor2 = aux_color;
+    bgColor1 = mainColor;
+    bgColor2 = auxColor;
 
     if(bt == FT_FLAT)
         glClearColor(bgColor1.r, bgColor1.g, bgColor1.b, bgColor1.a);
@@ -225,13 +225,13 @@ BitmapId gloutLoadBitmap(const char* file, int *w, int *h)
     return texture;
 }
 
-void gloutDrawRectangle(Point left_top, Point right_bottom, FillType ft, GradientType gt, Color main_color, Color aux_color)
+void gloutDrawRectangle(Point leftTop, Point rightBottom, FillType ft, GradientType gt, Color mainColor, Color auxColor)
 {
     GLfloat vertices[8] = {
-        left_top.x, left_top.y,
-        right_bottom.x, left_top.y,
-        right_bottom.x, right_bottom.y,
-        left_top.x, right_bottom.y
+        (float)leftTop.x, (float)leftTop.y,
+        rightBottom.x, (float)leftTop.y,
+        rightBottom.x, rightBottom.y,
+        (float)leftTop.x, rightBottom.y
     };
 
     GLuint indices[4] = {0, 1, 2, 3};
@@ -242,10 +242,10 @@ void gloutDrawRectangle(Point left_top, Point right_bottom, FillType ft, Gradien
         int i;
         for(i = 0; i < 4; ++i)
         {
-            colors[i * 4 + 0] = main_color.r;
-            colors[i * 4 + 1] = main_color.g;
-            colors[i * 4 + 2] = main_color.b;
-            colors[i * 4 + 3] = main_color.a;
+            colors[i * 4 + 0] = mainColor.r;
+            colors[i * 4 + 1] = mainColor.g;
+            colors[i * 4 + 2] = mainColor.b;
+            colors[i * 4 + 3] = mainColor.a;
         }
     }
 
@@ -255,18 +255,18 @@ void gloutDrawRectangle(Point left_top, Point right_bottom, FillType ft, Gradien
         {
                         case GT_V:
 
-            memcpy(colors, &main_color, sizeof(float) * 4);
-            memcpy(colors + 4, &main_color, sizeof(float) * 4);
-            memcpy(colors + 8, &aux_color, sizeof(float) * 4);
-            memcpy(colors + 12, &aux_color, sizeof(float) * 4);
+            memcpy(colors, &mainColor, sizeof(float) * 4);
+            memcpy(colors + 4, &mainColor, sizeof(float) * 4);
+            memcpy(colors + 8, &auxColor, sizeof(float) * 4);
+            memcpy(colors + 12, &auxColor, sizeof(float) * 4);
             break;
 
                         case GT_H:
 
-            memcpy(colors, &main_color, sizeof(float) * 4);
-            memcpy(colors + 4, &aux_color, sizeof(float) * 4);
-            memcpy(colors + 8, &aux_color, sizeof(float) * 4);
-            memcpy(colors + 12, &main_color, sizeof(float) * 4);
+            memcpy(colors, &mainColor, sizeof(float) * 4);
+            memcpy(colors + 4, &auxColor, sizeof(float) * 4);
+            memcpy(colors + 8, &auxColor, sizeof(float) * 4);
+            memcpy(colors + 12, &mainColor, sizeof(float) * 4);
 
             break;
 
@@ -290,19 +290,16 @@ void gloutDrawRectangle(Point left_top, Point right_bottom, FillType ft, Gradien
 
 void gloutBlitBitmap(BitmapId textureID, Transformations *transfs)
 {
-    Point lt = {0, 0};
-    Point rb = {transfs->size.x, transfs->size.y};
-    gloutBlitPartBitmap(textureID, transfs, lt, rb);
+    IntPoint lt = {0, 0};
+    gloutBlitPartBitmap(textureID, transfs, &lt, &transfs->size);
 
 }
 
-void gloutBlitPartBitmap(BitmapId textureID, Transformations *transfs, Point left_top, Point part_size)
+void gloutBlitPartBitmap(BitmapId textureID, Transformations *transfs, IntPoint *leftTop, IntPoint *partSize)
 {
 
-    float hw = part_size.x * transfs->scale.x / 2.0;
-    float hh = part_size.y * transfs->scale.y / 2.0;
-
-    transfs->angle %= 360;
+    float hw = (float)partSize->x * transfs->scale.x / 2.0;
+    float hh = (float)partSize->y * transfs->scale.y / 2.0;
 
     GLfloat vertices[8] = {
         -hw, -hh,
@@ -319,10 +316,10 @@ void gloutBlitPartBitmap(BitmapId textureID, Transformations *transfs, Point lef
         1, 1, 1, transfs->opacity
     };
 
-    float mx = transfs->size.x - 1.0f;
-    float my = transfs->size.y - 1.0f;
-    Point lt = {left_top.x / mx, left_top.y / my};
-    Point rb = {(left_top.x + part_size.x - 1.0f) / mx, (left_top.y + part_size.y - 1.0f) / my};
+    float mx = (float)transfs->size.x - 1.0f;
+    float my = (float)transfs->size.y - 1.0f;
+    Point lt = {(float)leftTop->x / mx, (float)leftTop->y / my};
+    Point rb = {((float)leftTop->x + (float)partSize->x - 1.0f) / mx, ((float)leftTop->y + (float)partSize->y - 1.0f) / my};
 
     GLfloat uvsf[8] = {
         lt.x, lt.y,
@@ -332,13 +329,11 @@ void gloutBlitPartBitmap(BitmapId textureID, Transformations *transfs, Point lef
     };
     
     GLint uvsi[8] = {
-        (int)left_top.x, (int)left_top.y,
-        (int)left_top.x + (int)part_size.x - 1, (int)left_top.y,
-        (int)left_top.x + (int)part_size.x - 1, (int)left_top.y + (int)part_size.y - 1,
-        (int)left_top.x, (int)left_top.y + (int)part_size.y - 1
+        leftTop->x, leftTop->y,
+        leftTop->x + partSize->x - 1, leftTop->y,
+        leftTop->x + partSize->x - 1, leftTop->y + partSize->y - 1,
+        leftTop->x, leftTop->y + partSize->y - 1
     };
-
-
 
     glVertexPointer(2, GL_FLOAT, 0, vertices);
     glColorPointer(4, GL_FLOAT, 0, colors);
@@ -377,59 +372,3 @@ void gloutBlitPartBitmap(BitmapId textureID, Transformations *transfs, Point lef
     glPopMatrix();
 }
 
-void gloutBlitText(BitmapId texture_id, Transformations *transfs, const char *text, Font font)
-{
-    int rc, c, i;
-    char *f;
-    int len = strlen(text);
-
-    Point r;
-    Point sz = {font.char_width, font.char_height};
-    Point h = {
-        (float)(font.char_width * len) / 2.0,
-        (float)font.char_height / 2.0
-    };
-
-    Transformations t = *transfs;
-
-    t.angle = 0;
-
-    glPushMatrix();
-
-    glTranslatef(transfs->trans.x, transfs->trans.y, 0);
-
-    glTranslatef(h.x, h.y, 0);
-
-    glRotatef(transfs->angle, 0.0, 0.0, 1.0f);
-
-    for(c = 0; c < len; ++c)
-    {
-        if(text[c] == ' ') continue;
-
-        f = strchr(font.char_string, tolower(text[c]));
-
-        if(!f) continue;
-
-        i = f - font.char_string;
-
-        Point o = {i * font.char_width, 0};
-
-        rc = c;
-
-        if(transfs->hflip)
-            rc = len - c - 1;
-
-        r.x = (float)(rc * font.char_width) - h.x;
-        r.y = (float)(0) - h.y;
-
-        r.x *= t.scale.x;
-        r.y *= t.scale.y;
-
-        t.trans = r;
-
-        gloutBlitPartBitmap(texture_id, &t, o, sz);
-    }
-
-    glPopMatrix();
-
-}

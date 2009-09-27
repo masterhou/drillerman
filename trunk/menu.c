@@ -76,7 +76,7 @@ void menu_Init(void *data)
 
     srand(time(NULL));
 
-    graphicsSetBackground(FT_FLAT, color(0.3, 0.59, 1.0, 1), color(0, 0, 0, 0), GT_NONE);
+    graphics_SetBackground(FT_FLAT, color(0.3, 0.59, 1.0, 1), color(0, 0, 0, 0), GT_NONE);
 
     snge_AddSprite(sprites_GetIdByName("menu_logo"), point(100, 25), 5);
 
@@ -89,7 +89,7 @@ void menu_Init(void *data)
 
     sprites_GetDimensions(starc, &starw, &starh);
 
-    menuEntries[ME_ARCADE] = snge_AddFontSprite(sprites_GetIdByName("font:base"), point(0, 0), 2, "arcade");
+    menuEntries[ME_ARCADE] = snge_AddFontSprite(sprites_GetIdByName("font:base"), point(0, 0), 2, "ARCADE!!arcade");
     menuEntries[ME_SURVIVAL] = snge_AddFontSprite(sprites_GetIdByName("font:base"), point(0, 70), 2, "survival");
     menuEntries[ME_HOF] = snge_AddFontSprite(sprites_GetIdByName("font:base"), point(0, 140), 2, "hall of fame");
     menuEntries[ME_EXIT] = snge_AddFontSprite(sprites_GetIdByName("font:base"), point(0, 210), 2, "exit");

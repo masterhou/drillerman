@@ -22,19 +22,17 @@ typedef void (*OutClearBuffer)();
 typedef void (*OutBlitBuffer)();
 typedef void (*OutSetFadeColor)(Color fcolor);
 typedef void (*OutDrawRectangle)(Point left_top, Point right_bottom, FillType ft, GradientType gt, Color main_color, Color aux_color);
-typedef void (*OutBlitPartBitmap)(BitmapId textureID, Transformations *transfs, Point left_top, Point part_size);
-typedef void (*OutBlitText)(BitmapId texture_id, Transformations *transfs, const char *text, Font font);
+typedef void (*OutBlitPartBitmap)(BitmapId textureID, Transformations *transfs, IntPoint *leftTop, IntPoint *partSize);
 
-OutLoadBitmapFunc graphicsLoadBitmap;
-OutBlitBitmapFunc graphicsBlitBitmap;
-OutBlitPartBitmap graphicsBlitPartBitmap;
-OutSetBackground graphicsSetBackground;
-OutClearBuffer graphicsClearBuffer;
-OutBlitBuffer graphicsBlitBuffer;
-OutSetFadeColor graphicsSetFadeColor;
-OutDrawRectangle graphicsDrawRectangle;
-OutBlitText graphicsBlitText;
+OutLoadBitmapFunc graphics_LoadBitmap;
+OutBlitBitmapFunc graphics_BlitBitmap;
+OutBlitPartBitmap graphics_BlitPartBitmap;
+OutSetBackground graphics_SetBackground;
+OutClearBuffer graphics_ClearBuffer;
+OutBlitBuffer graphics_BlitBuffer;
+OutSetFadeColor graphics_SetFadeColor;
+OutDrawRectangle graphics_DrawRectangle;
 
-void graphicsInitSubsytem(int screen_width, int screen_height);
+void graphics_Init(int screen_width, int screen_height);
 
 #endif

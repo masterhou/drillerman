@@ -127,9 +127,10 @@ void snge_FreeSprites()
 Point snge_GetTextSize(Sprite *psprite)
 {
     SpriteClass *sc = sprites_GetClass(psprite->sclass);
+
     Point sz = {
-        sc->font.char_width * strlen(psprite->text),
-        sc->font.char_height
+        sc->font->charSize.x * strlen(psprite->text),
+        sc->font->charSize.y
     };
 
     return sz;
@@ -259,8 +260,8 @@ void snge_Draw()
 
         if(sc->ssc == SSC_BFNT)
         {
-            bw = sc->font.char_width * strlen(s->text);
-            bh = sc->font.char_height;
+            bw = sc->font->charSize.x * strlen(s->text);
+            bh = sc->font->charSize.y;
         }
         else
         {
@@ -271,16 +272,19 @@ void snge_Draw()
         float w = bw * s->sx;
         float h = bh * s->sy;
 
+        if(s->angle >= 360.0)
+            s->angle = fmodf(s->angle, 360.0);
+
         //TODO: rotation -> bbox collision test!
 
         Transformations transfs = {
                                     trans: {x: s->x, y: s->y},
-                                    size: {x: (float)sc->frame[frame].w, y: (float)sc->frame[frame].h},
+                                    size:  {x: sc->frame[frame].w, y: sc->frame[frame].h},
                                     scale: {x: s->sx, y: s->sy},
-                                    angle: (int)floorf(s->angle),
-                                            s->opacity,
-                                            s->vflip,
-                                            s->hflip
+                                    angle:  s->angle,
+                                    opacity:s->opacity,
+                                    vflip:  s->vflip,
+                                    hflip:  s->hflip
                                     };
 
         if(!s->relative)
@@ -292,9 +296,26 @@ void snge_Draw()
         if(!OUTSIDE_SCREEN(transfs.trans.x, transfs.trans.y, w, h))
         {
             if(sc->ssc == SSC_BFNT)
-                graphicsBlitText(sc->frame->image, &transfs, s->text, sc->font);
+            {
+                unsigned char *c = (unsigned char*)s->text;
+                Font *pf = sc->font;
+
+                while(*c != '\0')
+                {
+                    IntPoint *cp = &pf->charPosLut[*c];
+
+                    if(cp->x >= 0)
+                    {
+                        graphics_BlitPartBitmap(sc->frame[0].image, &transfs, cp, &pf->charSize);
+                    }
+
+                    c++;
+                    transfs.trans.x += (float)pf->charSize.x + (float)pf->spacing.x;
+                }
+
+            }
             else
-                graphicsBlitBitmap(sc->frame[frame].image, &transfs);
+                graphics_BlitBitmap(sc->frame[frame].image, &transfs);
         }
 
         oldlayer = s->layer;

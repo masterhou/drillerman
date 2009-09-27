@@ -245,9 +245,9 @@ bool cfg_GetBool(char *propertyName)
         separateValue(buffer);
         trimString(buffer);
 
-        if(strcmp(buffer, "1") != 0 || strcmp(buffer, "yes") != 0 ||
-           strcmp(buffer, "y") != 0 || strcmp(buffer, "true") != 0 ||
-           strcmp(buffer, "t") != 0)
+        if(strcmp(buffer, "1") == 0 || strcmp(buffer, "yes") == 0 ||
+           strcmp(buffer, "y") == 0 || strcmp(buffer, "true") == 0 ||
+           strcmp(buffer, "t") == 0)
             return true;
     }
 

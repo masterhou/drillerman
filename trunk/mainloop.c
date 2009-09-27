@@ -65,13 +65,13 @@ static void procFade(float lag)
         {
             fadeAmount = 0.0;
             fadeStatus = FS_NOFADE;
-            graphicsSetFadeColor(color(0, 0, 0, fadeAmount));
+            graphics_SetFadeColor(color(0, 0, 0, fadeAmount));
         }
     }
 
 
     if(fadeStatus)
-        graphicsSetFadeColor(color(0, 255, 0, fadeAmount));
+        graphics_SetFadeColor(color(0, 255, 0, fadeAmount));
 
 }
 
@@ -119,7 +119,7 @@ void mainloop_Go()
     double lag = 0;
     Uint32 oldticks = 0;
 
-    mainloop_ChangeScr(SCR_GAME, NULL);
+    mainloop_ChangeScr(SCR_MENU, NULL);
 
     fadeDuration = 1.5;
     fadeAmount = 1.0;
@@ -132,7 +132,7 @@ void mainloop_Go()
 
         getFps(lag);
 
-        graphicsClearBuffer();
+        graphics_ClearBuffer();
 
         input_PumpEvents();
         snge_UpdateAnim(lag);
@@ -151,7 +151,7 @@ void mainloop_Go()
         if(input_IsKeyPressed(KEY_EXIT) || input_WantQuit())
             done = true;
 
-        graphicsBlitBuffer();
+        graphics_BlitBuffer();
 
         timer_CleanTimers();
         //SDL_Delay(10);
