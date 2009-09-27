@@ -271,7 +271,7 @@ void snge_Draw()
         float w = bw * s->sx;
         float h = bh * s->sy;
 
-        //TODO: obrot i bounding box !!! (test kolizji z ekranem...)
+        //TODO: rotation -> bbox collision test!
 
         Transformations transfs = {
                                     trans: {x: s->x, y: s->y},

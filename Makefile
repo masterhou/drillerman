@@ -1,5 +1,5 @@
 CC		= gcc
-CFLAGS		= -O0 -Wall -pipe -g -ffast-math -fsingle-precision-constant 
+CFLAGS		= -O0 -Wall -pipe -g -fsingle-precision-constant
 #CFLAGS 		= -O3 -pipe -fomit-frame-pointer -march=prescott
 #-D_DATA_PATH=\"${DAT_DIR}\" 
 LDFLAGS		= -lSDL -lGL -lGLU -lSDL_image -lm
@@ -25,8 +25,7 @@ OBJECTS		= main.o \
                 timer.o \
                 stack.o \
                 bcg.o \
-                particles.o \
-                glesout.o
+                particles.o
 			
 SOURCES		= $(OBJECTS:.o=.c)
 

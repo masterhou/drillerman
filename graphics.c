@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "glout.h"
-#include "glesout.h"
 
 #include "message.h"
 
@@ -38,19 +37,6 @@ OutFuncs outFuncs[OT_LAST] = {
         blitPartBitmap: &gloutBlitPartBitmap,
         blitText: &gloutBlitText
     },
-    {
-        loadBitmap: &glesoutLoadBitmap,
-        initSubsystem: &glesoutInitSubsystem,
-        blitBitmap: &glesoutBlitBitmap,
-        setBackground: &glesoutSetBackground,
-        clearBuffer: &glesoutClearBuffer,
-        blitBuffer: &glesoutBlitBuffer,
-        setFadeColor: &glesoutSetFadeColor,
-        drawRectangle: &glesoutDrawRectangle,
-        blitPartBitmap: &glesoutBlitPartBitmap,
-        blitText: &glesoutBlitText
-    }
-
 };
 
 void graphicsInitSubsytem(int screen_width, int screen_height)

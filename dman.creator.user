@@ -56,7 +56,7 @@
   <valuemap type="QVariantMap" >
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >all</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList" >
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-N30oli25x4,guid=b91a021b003b70ba37e437dc4abb68aa</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-6f7caPaLz9,guid=afcf14e613eaf86e8380b6ce4abf439a</value>
     <value type="QString" >DESKTOP_SESSION=default</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
@@ -64,28 +64,28 @@
     <value type="QString" >GDM_LANG=pl_PL.UTF-8</value>
     <value type="QString" >GDM_XSERVER_LOCATION=local</value>
     <value type="QString" >GNOME_DESKTOP_SESSION_ID=this-is-deprecated</value>
-    <value type="QString" >GNOME_KEYRING_PID=5062</value>
-    <value type="QString" >GNOME_KEYRING_SOCKET=/tmp/keyring-7Zy3bh/socket</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-ERREoo/S.gpg-agent:5134:1</value>
+    <value type="QString" >GNOME_KEYRING_PID=3165</value>
+    <value type="QString" >GNOME_KEYRING_SOCKET=/tmp/keyring-gyBagb/socket</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/seahorse-YxVYcQ/S.gpg-agent:3383:1</value>
     <value type="QString" >GTK_MODULES=canberra-gtk-module</value>
     <value type="QString" >GTK_RC_FILES=/etc/gtk/gtkrc:/home/dsh/.gtkrc-1.2-gnome2</value>
     <value type="QString" >HOME=/home/dsh</value>
     <value type="QString" >LANG=pl_PL.UTF-8</value>
-    <value type="QString" >LD_LIBRARY_PATH=/opt/qtcreator-1.2.1/lib/qtcreator:</value>
+    <value type="QString" >LD_LIBRARY_PATH=/opt/qtsdk-2009.03/lib/qtcreator:</value>
     <value type="QString" >LOGNAME=dsh</value>
     <value type="QString" >ORBIT_SOCKETDIR=/tmp/orbit-dsh</value>
     <value type="QString" >PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games</value>
     <value type="QString" >PWD=/home/dsh</value>
-    <value type="QString" >SESSION_MANAGER=local/m-eve:/tmp/.ICE-unix/5074</value>
+    <value type="QString" >SESSION_MANAGER=local/eve:/tmp/.ICE-unix/3177</value>
     <value type="QString" >SHELL=/bin/bash</value>
-    <value type="QString" >SSH_AGENT_PID=5133</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/keyring-7Zy3bh/socket.ssh</value>
+    <value type="QString" >SSH_AGENT_PID=3359</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/keyring-gyBagb/socket.ssh</value>
     <value type="QString" >USER=dsh</value>
     <value type="QString" >USERNAME=dsh</value>
     <value type="QString" >WINDOWPATH=7</value>
     <value type="QString" >XAUTHORITY=/home/dsh/.Xauthority</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/local/share/:/usr/share/:/usr/share/gdm/</value>
-    <value type="QString" >XDG_SESSION_COOKIE=9f2e7360c9a2de7838dd2e234ab81fc8-1253796009.194714-335028389</value>
+    <value type="QString" >XDG_SESSION_COOKIE=810fe12591ce0af3fef4d8024abcbb6f-1254048665.984467-974901841</value>
    </valuelist>
    <valuelist key="abstractProcess.arguments" type="QVariantList" >
     <value type="QString" >all</value>

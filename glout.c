@@ -20,8 +20,8 @@ static Color bgColor1;
 static Color bgColor2;
 static Color fadeColor;
 
-extern int screenWidth;
-extern int screenHeight;
+int screenWidth;
+int screenHeight;
 
 static int queryExtenstion(char *extName)
 {
@@ -48,8 +48,10 @@ static int queryExtenstion(char *extName)
 }
 
 
-void gloutInitSubsystem(int screen_width, int screen_height)
+void gloutInitSubsystem(int setScreenWidth, int setScreenHeight)
 {
+    screenWidth = setScreenWidth;
+    screenHeight = setScreenHeight;
 
     extGL_ARB_NPOT = queryExtenstion("GL_ARB_texture_non_power_of_two");
     extGL_ARB_TEX_RECT = queryExtenstion("GL_ARB_texture_rectangle");
@@ -94,7 +96,10 @@ void gloutInitSubsystem(int screen_width, int screen_height)
 
     glLoadIdentity();
 
-    glOrtho(0, screen_width, screen_height, 0, -1, 1);
+    double scaledHeight = (double)screenWidth / (double)_SCREEN_WIDTH * (double)_SCREEN_HEIGHT;
+
+    glOrtho(0, _SCREEN_WIDTH, _SCREEN_HEIGHT, 0, -1, 1);
+    glViewport(0, (screenHeight - (int)scaledHeight) / 2, screenWidth, (int)scaledHeight);
 
     glMatrixMode(GL_MODELVIEW);
 
@@ -293,23 +298,6 @@ void gloutBlitBitmap(BitmapId textureID, Transformations *transfs)
 
 void gloutBlitPartBitmap(BitmapId textureID, Transformations *transfs, Point left_top, Point part_size)
 {
-    extern float xScrRatio;
-    extern float yScrRatio;
-
-    if(xScrRatio != 1.0)
-    {
-        transfs->trans.x *= xScrRatio;
-        transfs->scale.x *= xScrRatio;
-        transfs->size.x *= xScrRatio;
-        part_size.x *= xScrRatio;
-    }
-
-    if(yScrRatio != 1.0)
-    {
-        transfs->trans.y *= yScrRatio;
-        transfs->scale.y *= yScrRatio;
-        part_size.y *= yScrRatio;
-    }
 
     float hw = part_size.x * transfs->scale.x / 2.0;
     float hh = part_size.y * transfs->scale.y / 2.0;
@@ -331,10 +319,10 @@ void gloutBlitPartBitmap(BitmapId textureID, Transformations *transfs, Point lef
         1, 1, 1, transfs->opacity
     };
 
-    float mx = transfs->size.x - 1;
-    float my = transfs->size.y - 1;
+    float mx = transfs->size.x - 1.0f;
+    float my = transfs->size.y - 1.0f;
     Point lt = {left_top.x / mx, left_top.y / my};
-    Point rb = {(left_top.x + part_size.x - 1) / mx, (left_top.y + part_size.y - 1) / my};
+    Point rb = {(left_top.x + part_size.x - 1.0f) / mx, (left_top.y + part_size.y - 1.0f) / my};
 
     GLfloat uvsf[8] = {
         lt.x, lt.y,
@@ -342,6 +330,7 @@ void gloutBlitPartBitmap(BitmapId textureID, Transformations *transfs, Point lef
         rb.x, rb.y,
         lt.x, rb.y
     };
+    
     GLint uvsi[8] = {
         (int)left_top.x, (int)left_top.y,
         (int)left_top.x + (int)part_size.x - 1, (int)left_top.y,
