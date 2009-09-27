@@ -21,6 +21,14 @@ typedef struct
 
 typedef struct
 {
+    IntPoint charSize;
+    IntPoint spacing;
+    char charString[_STR_BUFLEN];
+    IntPoint charPosLut[256];
+} Font;
+
+typedef struct
+{
     char *name;
     int fcount;
     double fps;
@@ -28,8 +36,7 @@ typedef struct
     int arepeat;
     SpriteFrame *frame;
     SpriteSubClass ssc;
-    Font font;
-
+    Font *font;
 } SpriteClass;
 
 void sprites_Init();

@@ -1,7 +1,17 @@
 [font:base]
-font=yes
-char_width=45
-char_height=60
-char_string=abcdefghijklmnopqrstuvwxyz.:,!?"+-=
+
+char_width=30
+horz_spacing=2
+
+char_height=31
+vert_spacing=1
+
+char_string=^!"^^^^'()^^,^.^0123456789:;^^^?^ABCDEFGHIJKLMNOPQRSTUVWXYZ
+chars_in_row=10
+
+case_sensitive=no
+
 image=base.png
+
+
 

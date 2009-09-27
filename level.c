@@ -11,12 +11,6 @@
 
 typedef struct
 {
-    int x;
-    int y;
-} IntPoint;
-
-typedef struct
-{
     Sprite *sprite;
     Particle *particle;
     FieldType type;

@@ -5,7 +5,7 @@
 #include <GL/glu.h>
 
 #include "defs.h"
-
+#include "common.h"
 #include "graphics.h"
 
 #define FILTER_LINEAR 0
@@ -15,14 +15,13 @@
 void gloutInitSubsystem(int screen_width, int screen_height);
 
 void gloutBlitBitmap(BitmapId textureID, Transformations *transfs);
-void gloutBlitPartBitmap(BitmapId textureID, Transformations *transfs, Point left_top, Point part_size);
+void gloutBlitPartBitmap(BitmapId textureID, Transformations *transfs, IntPoint *leftTop, IntPoint *partSize);
 BitmapId gloutLoadBitmap(const char *file, int *w, int *h);
-void gloutSetBackground(FillType bt, Color main_color, Color aux_color, GradientType gt);
+void gloutSetBackground(FillType bt, Color mainColor, Color auxColor, GradientType gt);
 void gloutClearBuffer();
 void gloutBlitBuffer();
 void gloutSetFadeColor(Color fcolor);
-void gloutDrawRectangle(Point left_top, Point right_bottom, FillType ft, GradientType gt, Color main_color, Color aux_color);
-void gloutBlitText(BitmapId texture_id, Transformations *transfs, const char *text, Font font);
+void gloutDrawRectangle(Point left_top, Point right_bottom, FillType ft, GradientType gt, Color mainColor, Color auxColor);
 
 
 #endif

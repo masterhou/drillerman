@@ -28,13 +28,6 @@ typedef unsigned char bool;
 #define true 1
 #define false 0
 
-typedef struct
-{
-    int char_width;
-    int char_height;
-    char char_string[256];
-} Font;
-
 typedef unsigned int BitmapId ;
 
 typedef struct
@@ -42,6 +35,12 @@ typedef struct
     float x;
     float y;
 } Point;
+
+typedef struct
+{
+    int x;
+    int y;
+} IntPoint;
 
 typedef struct
 {
@@ -54,9 +53,9 @@ typedef struct
 typedef struct
 {
     Point trans;
-    Point size;
+    IntPoint size;
     Point scale;
-    int angle;
+    float angle;
     float opacity;
     char vflip;
     char hflip;

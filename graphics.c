@@ -20,8 +20,6 @@ typedef struct
     OutSetFadeColor setFadeColor;
     OutDrawRectangle drawRectangle;
     OutBlitPartBitmap blitPartBitmap;
-    OutBlitText blitText;
-
 } OutFuncs;
 
 OutFuncs outFuncs[OT_LAST] = {
@@ -35,22 +33,20 @@ OutFuncs outFuncs[OT_LAST] = {
         setFadeColor: &gloutSetFadeColor,
         drawRectangle: &gloutDrawRectangle,
         blitPartBitmap: &gloutBlitPartBitmap,
-        blitText: &gloutBlitText
     },
 };
 
-void graphicsInitSubsytem(int screen_width, int screen_height)
+void graphics_Init(int screen_width, int screen_height)
 {
     outFuncs[outType].initSubsystem(screen_width, screen_height);
-    graphicsLoadBitmap = outFuncs[outType].loadBitmap;
-    graphicsBlitBitmap = outFuncs[outType].blitBitmap;
-    graphicsBlitPartBitmap = outFuncs[outType].blitPartBitmap;
-    graphicsSetBackground = outFuncs[outType].setBackground;
-    graphicsClearBuffer = outFuncs[outType].clearBuffer;
-    graphicsBlitBuffer = outFuncs[outType].blitBuffer;
-    graphicsSetFadeColor = outFuncs[outType].setFadeColor;
-    graphicsDrawRectangle = outFuncs[outType].drawRectangle;
-    graphicsBlitText = outFuncs[outType].blitText;
+    graphics_LoadBitmap = outFuncs[outType].loadBitmap;
+    graphics_BlitBitmap = outFuncs[outType].blitBitmap;
+    graphics_BlitPartBitmap = outFuncs[outType].blitPartBitmap;
+    graphics_SetBackground = outFuncs[outType].setBackground;
+    graphics_ClearBuffer = outFuncs[outType].clearBuffer;
+    graphics_BlitBuffer = outFuncs[outType].blitBuffer;
+    graphics_SetFadeColor = outFuncs[outType].setFadeColor;
+    graphics_DrawRectangle = outFuncs[outType].drawRectangle;
 }
 
 

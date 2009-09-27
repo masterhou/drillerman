@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "graphics.h"
 #include "message.h"
@@ -99,7 +100,7 @@ void sprites_LoadFromCfg(const char *cfgpathrel, const char *namePrefix)
 
             sprintf(texpath, "%s%s", sprpath, texfile);
 
-            frame->image = graphicsLoadBitmap(texpath, &frame->w, &frame->h);
+            frame->image = graphics_LoadBitmap(texpath, &frame->w, &frame->h);
 
             message_OutEx("\tLoading frame %2d : '%s' (%dx%d) ...\n", i + 1, texpath, frame->w, frame->h);
 
@@ -172,21 +173,63 @@ void sprites_LoadFontsFromCfg(char *cfgpathrel)
         sc->frame = malloc(sizeof(SpriteFrame));
         sc->ssc = SSC_BFNT;
 
+        sc->font = malloc(sizeof(Font));
+
         char texfile[_STR_BUFLEN];
         char texpath[_STR_BUFLEN];
 
-        cfg_GetIntValue("char_width", &sc->font.char_width);
-        cfg_GetIntValue("char_height", &sc->font.char_height);
-        cfg_GetStringValue("char_string", sc->font.char_string);
+        cfg_GetIntValue("char_width", &sc->font->charSize.x);
+        cfg_GetIntValue("char_height", &sc->font->charSize.y);
+        cfg_GetIntValue("horz_spacing", &sc->font->spacing.x);
+        cfg_GetIntValue("vert_spacing", &sc->font->spacing.y);
+        cfg_GetStringValue("char_string", sc->font->charString);
 
-        message_OutEx("\tCharacter string: '%s'\n", sc->font.char_string);
-        message_OutEx("\tCharacter size: %dx%d\n", sc->font.char_width, sc->font.char_height);
+        /* Generate character position lookup table. */
+
+        int charsInRow;
+        bool caseSens;
+        int csLen = strlen(sc->font->charString);
+        int i;
+
+        cfg_GetIntValue("chars_in_row", &charsInRow);
+        caseSens = cfg_GetBool("case_sensitive");
+
+        if(caseSens)
+            message_Out("Case sensitive.\n");
+
+        for(i = 0; i < 256; ++i)
+        {
+            sc->font->charPosLut[i].x = -1;
+            sc->font->charPosLut[i].y = -1;
+        }
+
+        for(i = 0; i < csLen; ++i)
+        {
+            unsigned char *p = (unsigned char*)&sc->font->charString[i];
+
+            IntPoint pos = {x : (i % charsInRow) * (sc->font->charSize.x + sc->font->spacing.x),
+                            y : (i / charsInRow) * (sc->font->charSize.y + sc->font->spacing.y)};
+
+            if(!caseSens)
+            {
+                sc->font->charPosLut[(unsigned char)tolower((char)*p)] = pos;
+                sc->font->charPosLut[(unsigned char)toupper((char)*p)] = pos;
+            }
+            else
+                sc->font->charPosLut[*p] = pos;
+        }
+
+        message_OutEx("\tCharacter string: '%s'\n", sc->font->charString);
+        message_OutEx("\tCharacter size: %dx%d\n", sc->font->charSize.x, sc->font->charSize.y);
+
+
+        /* Load the image. */
 
         cfg_GetStringValue("image", texfile);
 
         sprintf(texpath, "%s%s", imgpath, texfile);
 
-        sc->frame->image = graphicsLoadBitmap(texpath, &sc->frame->w, &sc->frame->h);
+        sc->frame->image = graphics_LoadBitmap(texpath, &sc->frame->w, &sc->frame->h);
 
         message_OutEx("\tLoading bmp font image: '%s' (%dx%d) ...\n", texpath, sc->frame->w, sc->frame->h);
 
@@ -239,6 +282,11 @@ void sprites_FreeAll()
     {
         for(j = 0; j < classes[i].fcount; ++j)
             glDeleteTextures(1, &classes[i].frame[j].image);
+
+        if(classes[i].ssc == SSC_BFNT)
+        {
+            free(classes[i].font);
+        }
 
         free(classes[i].frame);
         free(classes[i].name);
