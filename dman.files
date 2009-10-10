@@ -34,6 +34,8 @@ level.c
 level.h
 player.c
 player.h
+hud.c
+hud.h
 timer.c
 timer.h
 stack.c

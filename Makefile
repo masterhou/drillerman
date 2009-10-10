@@ -25,7 +25,8 @@ OBJECTS		= main.o \
                 timer.o \
                 stack.o \
                 bcg.o \
-                particles.o
+                particles.o \
+                hud.o
 			
 SOURCES		= $(OBJECTS:.o=.c)
 

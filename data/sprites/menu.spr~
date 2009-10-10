@@ -30,11 +30,6 @@ frame(1)=start1.png
 frames=1
 frame(1)=start2.png
 
-[credits]
-frames=1
-frame(1)=credits.png
-
-
 
 
 

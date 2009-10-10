@@ -4,6 +4,8 @@
 #include "graphics.h"
 #include "sprites.h"
 
+typedef enum {GAUGE_NONE, GAUGE_LR, GAUGE_RL, GAUGE_UD, GAUGE_DU} GaugeType;
+
 typedef int SpriteId;
 
 typedef struct
@@ -33,19 +35,22 @@ typedef struct
 
     char text[256];
 
-
+    float gaugeFill;
+    GaugeType gaugeType;
 } Sprite;
 
 void snge_Init();
 Sprite *snge_AddSprite(SpriteClassId sprclass, Point pos, int layer);
-inline Sprite *snge_AddFontSprite(SpriteClassId fontclass, Point pos, int layer, char *string);
+Sprite *snge_AddFontSprite(SpriteClassId fontclass, Point pos, int layer, char *string);
+Sprite *snge_AddGaugeSprite(SpriteClassId sprclass, Point pos, int layer, GaugeType gaugeType);
 void snge_FreeSprites();
 void snge_UpdateAnim(float lag);
 void snge_Draw();
-Point snge_GetTextSize(Sprite *psprite);
+IntPoint snge_GetTextSize(Sprite *psprite);
 void snge_MoveViewport(Point newpos);
 void snge_RelativizeSprite(Sprite *sprite);
 void snge_CleanupSprites();
 void snge_SwitchAnim(Sprite *pSprite, SpriteClassId scid);
+
 
 #endif
