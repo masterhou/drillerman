@@ -97,10 +97,21 @@ Sprite *snge_AddSprite(SpriteClassId sprclass, Point pos, int layer)
     s->aended = false;
     s->relative = false;
 
+    s->gaugeType = GAUGE_NONE;
+
     return s;
 }
 
-inline Sprite *snge_AddFontSprite(SpriteClassId fontclass, Point pos, int layer, char *string)
+Sprite *snge_AddGaugeSprite(SpriteClassId sprclass, Point pos, int layer, GaugeType gaugeType)
+{
+    Sprite *s = snge_AddSprite(sprclass, pos, layer);
+    s->gaugeType = gaugeType;
+    s->gaugeFill = 0.0;
+
+    return s;
+}
+
+Sprite *snge_AddFontSprite(SpriteClassId fontclass, Point pos, int layer, char *string)
 {
     Sprite *s = snge_AddSprite(fontclass, pos, layer);
     strcpy(s->text, string);
@@ -118,17 +129,14 @@ void snge_FreeSprites()
     for(i = 0; i < count; ++i)
         free(sprites[i]);
 
-    free(sprites);
-
     count = 0;
-    sprites = NULL;
 }
 
-Point snge_GetTextSize(Sprite *psprite)
+IntPoint snge_GetTextSize(Sprite *psprite)
 {
     SpriteClass *sc = sprites_GetClass(psprite->sclass);
 
-    Point sz = {
+    IntPoint sz = {
         sc->font->charSize.x * strlen(psprite->text),
         sc->font->charSize.y
     };
@@ -315,7 +323,43 @@ void snge_Draw()
 
             }
             else
-                graphics_BlitBitmap(sc->frame[frame].image, &transfs);
+            {
+                if(s->gaugeType != GAUGE_NONE)
+                {
+
+                    IntPoint from = {0, 0};
+                    IntPoint sz = {bw, bh};
+
+                    switch(s->gaugeType)
+                    {
+                        case GAUGE_LR:
+                            sz.x = (int)((float)bw * s->gaugeFill);
+                            graphics_BlitPartBitmap(sc->frame[frame].image, &transfs, &from, &sz);
+                        break;
+
+                        case GAUGE_RL:
+                            sz.x = (int)((float)bw * s->gaugeFill);
+                            from.x = bw - sz.x;
+                            transfs.trans.x += (float)from.x;
+                            graphics_BlitPartBitmap(sc->frame[frame].image, &transfs, &from, &sz);
+                        break;
+
+                        case GAUGE_UD:
+                            sz.y = (int)((float)bh * s->gaugeFill);
+                            graphics_BlitPartBitmap(sc->frame[frame].image, &transfs, &from, &sz);
+                        break;
+
+                        case GAUGE_DU:
+                            sz.y = (int)((float)bh * s->gaugeFill);
+                            from.y = bh - sz.y;
+                            transfs.trans.y += (float)from.y;
+                            graphics_BlitPartBitmap(sc->frame[frame].image, &transfs, &from, &sz);
+                        break;
+                    }
+                }
+                else
+                    graphics_BlitBitmap(sc->frame[frame].image, &transfs);
+            }
         }
 
         oldlayer = s->layer;

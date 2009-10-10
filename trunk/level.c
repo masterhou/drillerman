@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "defs.h"
 #include "common.h"
@@ -76,6 +77,8 @@ static Stack bodyStack;
 static Stack mainStack;
 static Stack timerStack;
 static Stack shiftStack;
+
+static SpriteClassId scidPointsFont;
 
 static float vShift;
 
@@ -344,6 +347,8 @@ static void loadScids()
     }
 
     cScids = scids[0];
+
+    scidPointsFont = sprites_GetIdByName("font:small");
 }
 
 static void addExplodeParticles(float x, float y)
@@ -747,6 +752,20 @@ static void setBrickDestroying(MapField *field, int x, int y)
     field->type = VF_NONE;
 }
 
+bool level_AddPointsParticle(int x, int y, int points)
+{
+    float xpos = (float)(_BRICK_WIDTH * x + _BRICK_WIDTH / 2);
+    float ypos = (float)(_BRICK_HEIGHT * y + _BRICK_HEIGHT / 2) + vShift;
+
+    Sprite *s = snge_AddFontSprite(scidPointsFont, point(xpos, ypos), _POINTS_PARTICLE_LAYER, "");
+    snprintf(s->text, _STR_BUFLEN, "%d", points);
+
+    Particle *p = particles_Add(s);
+    particles_SetVelocity(p, 0.0, -_POINTS_PARTICLE_SPEED, false);
+    particles_SetFading(p, _POINTS_PARTICLE_FADESPEED, true);
+
+}
+
 bool level_HitCrate(int x, int y)
 {
     MapField *field = &cMap[x][y];
@@ -797,14 +816,18 @@ bool level_IsAirGetAir(int x, int y, Sprite **psprite)
 
 }
 
-void level_DestroyBrick(int x, int y, bool blink)
+int level_DestroyBrick(int x, int y, bool blink)
 {
     IntPoint p = {x: x, y: y};
 
     stackPush(&bodyStack, &p);
 
+    int size = 0;
+
     while(stackNotEmpty(&bodyStack))
     {
+        size++;
+
         IntPoint bp = *((IntPoint*)stackPop(&bodyStack));
         MapField *field = &cMap[bp.x][bp.y];
         FieldType type = field->type;
@@ -831,6 +854,8 @@ void level_DestroyBrick(int x, int y, bool blink)
 
         pushAdjacentSameBricks(&bodyStack, bp, type);
     }
+
+    return size;
 }
 
 int level_IsSolid(int x, int y)

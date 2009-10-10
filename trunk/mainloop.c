@@ -71,7 +71,7 @@ static void procFade(float lag)
 
 
     if(fadeStatus)
-        graphics_SetFadeColor(color(0, 255, 0, fadeAmount));
+        graphics_SetFadeColor(color(0, 0, 0, fadeAmount));
 
 }
 

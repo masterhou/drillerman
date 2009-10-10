@@ -188,3 +188,11 @@ frame(1)=crate_hit_4.png
 [brick-inter]
 frames=1
 frame(1)=interbrick.png
+
+[gauge-fill]
+frames=1
+frame(1)=gaugefill.png
+
+[gauge-over]
+frames=1
+frame(1)=gaugeover.png

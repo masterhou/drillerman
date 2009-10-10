@@ -10,6 +10,7 @@
 #include "sprites.h"
 #include "snge.h"
 #include "particles.h"
+#include "hud.h"
 
 static int mapHeight = 35;
 
@@ -25,6 +26,8 @@ static void loadLevelSpriteClasses(int levelNum)
     sprites_LoadFromCfgF("sprites/levelset_%d/green/green.spr", prefix, levelNum + 1);
     sprites_LoadFromCfgF("sprites/levelset_%d/yellow/yellow.spr", prefix, levelNum + 1);
     sprites_LoadFromCfgF("sprites/levelset_%d/bcg/bcg.spr", prefix, levelNum + 1);
+
+    sprites_LoadFontsFromCfg("fonts/fonts.desc");
 }
 
 void game_Init(void *data)
@@ -37,6 +40,7 @@ void game_Init(void *data)
         loadLevelSpriteClasses(i);
 
     player_Init(mapHeight);
+    hud_Init();
 }
 
 int game_Frame(float lag)

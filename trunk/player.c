@@ -8,13 +8,17 @@
 #include "level.h"
 #include "bcg.h"
 #include "particles.h"
+#include "hud.h"
+
+static int depth;
+static int points;
+static float air;
 
 static inline bool drillField(int x, int y);
 static void addDrillParticles(int x, int y, Direction hitDirection);
 static void advanceLevel(int hitx);
 static bool checkSupport(int vx, int vy, Direction *leanOutDirection);
 static void updatePlayerPosition(float lag);
-
 
 static char directionName[DIR_COUNT][50] = {"left", "right", "up", "down"};
 static int directionDelta[DIR_COUNT][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
@@ -72,7 +76,9 @@ static inline bool drillField(int x, int y)
 
     if(ft < VF_BRICK_COUNT)
     {
-        level_DestroyBrick(x, y, false);
+        int size = level_DestroyBrick(x, y, false);
+        points += size;
+        level_AddPointsParticle(x, y, size);
         return true;
     }
 
@@ -417,6 +423,10 @@ static void updatePlayerPosition(float lag)
 
 void player_Init(int levelHeight)
 {
+    points = 0;
+    depth = 0;
+    air = 100.0;
+
     mapHeight = levelHeight;
     level = 0;
     levelAdvanceFalling = false;
@@ -470,6 +480,10 @@ static void collectItems()
 
     if(level_IsAirGetAir(vx, vy, &itemSprite))
     {
+        points += _POINTS_FOR_AIR;
+        air += _AIR_RESTORE;
+
+        level_AddPointsParticle(vx, vy, _POINTS_FOR_AIR);
         snge_RelativizeSprite(itemSprite);
         Particle *p = particles_Add(itemSprite);
         particles_SetDestination(p, point(_AIR_DEST_X, _AIR_DEST_Y), _AIR_FLY_SPEED, true, false, true);
@@ -477,6 +491,7 @@ static void collectItems()
         p->fadeSpeed /= 3.0;
         p->rotateSpeed = _AIR_ROT_SPEED;
         itemSprite->layer++;
+
     }
 }
 
@@ -501,6 +516,14 @@ void player_Frame(float lag)
     snge_MoveViewport(viewportPos);
 
     player->x = gX - _PLAYER_WIDTH2 - _PLAYER_SPRITE_PADDING_X + _MAP_OFFSET_X;
+
+    air -= _AIR_DECREASE_SPEED * lag;
+    if(air < 0.0)
+        air = 0.0;
+    depth = (mapHeight * level) + vy;
+    hud_SetDepth(depth);
+    hud_SetPoints(points);
+    hud_SetAir(air);
 }
 
 void player_Cleanup()
