@@ -58,14 +58,18 @@ void sprites_LoadFromCfg(const char *cfgpathrel, const char *namePrefix)
         incrementClassCount();
         int s = count - 1;
 
+#ifdef DEBUG
         message_OutEmfEx("Loading sprite class '%s' id '%d'...\n", name, s);
+#endif
 
         SpriteClass *sc = &classes[s];
 
         sc->name = malloc(strlen(name) + strlen(namePrefix) + 1);
         sprintf(sc->name, "%s%s", namePrefix, name);
 
+#ifdef DEBUG
         message_OutEmfEx("Internal sprite class name: %s\n", sc->name);
+#endif
 
         sc->areverse = cfg_GetBool("reverse");
         sc->arepeat = cfg_GetBool("repeat");
@@ -77,8 +81,10 @@ void sprites_LoadFromCfg(const char *cfgpathrel, const char *namePrefix)
         if(sc->fcount > 1)
         {
             cfg_GetDoubleValue("speed", &sc->fps);
+#ifdef DEBUG
             message_OutEx("\tHas %d frames.\n", sc->fcount);
             message_OutEx("\tRuns at %2.2lf fps.\n", sc->fps);
+#endif
             sc->ssc = SSC_ANIM;
         }
 
@@ -101,9 +107,9 @@ void sprites_LoadFromCfg(const char *cfgpathrel, const char *namePrefix)
             sprintf(texpath, "%s%s", sprpath, texfile);
 
             frame->image = graphics_LoadBitmap(texpath, &frame->w, &frame->h);
-
+#ifdef DEBUG
             message_OutEx("\tLoading frame %2d : '%s' (%dx%d) ...\n", i + 1, texpath, frame->w, frame->h);
-
+#endif
             if(!frame->image)
                 message_CriticalErrorEx("Could not load frame %d - '%s'.\n", i, texpath);
 
@@ -115,9 +121,10 @@ void sprites_LoadFromCfg(const char *cfgpathrel, const char *namePrefix)
         }
 
     }
-
+#ifdef DEBUG
     message_OutEx("Loaded %d bitmaps of approximate size of %.3lf MiB\n",
                  totalnum, (double)totalsz / (1024.0 * 1024.0));
+#endif
 
     cfg_Close();
 }
@@ -159,7 +166,9 @@ void sprites_LoadFontsFromCfg(char *cfgpathrel)
 
     while(cfg_NextSection(name))
     {
+#ifdef DEBUG
         message_OutEx("Loading sprite:font class '%s'...\n", name);
+#endif
 
         incrementClassCount();
 
@@ -218,10 +227,10 @@ void sprites_LoadFontsFromCfg(char *cfgpathrel)
             else
                 sc->font->charPosLut[*p] = pos;
         }
-
+#ifdef DEBUG
         message_OutEx("\tCharacter string: '%s'\n", sc->font->charString);
         message_OutEx("\tCharacter size: %dx%d\n", sc->font->charSize.x, sc->font->charSize.y);
-
+#endif
 
         /* Load the image. */
 
@@ -230,8 +239,9 @@ void sprites_LoadFontsFromCfg(char *cfgpathrel)
         sprintf(texpath, "%s%s", imgpath, texfile);
 
         sc->frame->image = graphics_LoadBitmap(texpath, &sc->frame->w, &sc->frame->h);
-
+#ifdef DEBUG
         message_OutEx("\tLoading bmp font image: '%s' (%dx%d) ...\n", texpath, sc->frame->w, sc->frame->h);
+#endif
 
         if(!sc->frame->image)
             message_CriticalErrorEx("Could not load font image '%s'.\n", texpath);
@@ -240,9 +250,10 @@ void sprites_LoadFontsFromCfg(char *cfgpathrel)
         totalnum++;
 
     }
-
+#ifdef DEBUG
     message_OutEx("Loaded %d bitmaps of approximate size of %.3lf MiB\n",
                  totalnum, (double)totalsz / (1024.0 * 1024.0));
+#endif
 
     cfg_Close();
 }
