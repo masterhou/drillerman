@@ -3,6 +3,8 @@
 
 #define _STR_BUFLEN 256
 
+#define _FPS_LIMIT 60.0
+
 #define _SCREEN_WIDTH 800
 #define _SCREEN_HEIGHT 480
 

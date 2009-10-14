@@ -33,7 +33,7 @@ static float fadeDuration;
 static ScreenId fadeIntoScr;
 static void *fadeIntoScrData;
 
-
+static int lastDelay;
 
 static ScreenId scr = SCR_NONE;
 static ScreenFuncs scrFuncs[SCR_LAST] =	{
@@ -75,7 +75,7 @@ static void procFade(float lag)
 
 }
 
-static float getFps(float lag)
+static inline float getFPS(float lag)
 {
     fps[fpsItem] = 1.0 / lag;
     fpsItem++;
@@ -87,10 +87,24 @@ static float getFps(float lag)
     for(i = 0; i < _FPS_ITEM_COUNT; ++i)
         cfps += fps[i] / (float)_FPS_ITEM_COUNT;
 
-    //if(fpsItem == 0)
-      //  message_OutEx("FPS: %f\n", cfps);
+    if(fpsItem == 0)
+        message_OutEx("FPS: %f\n", cfps);
 
     return cfps;
+}
+
+static inline void fpsLimiterDelay(float lag)
+{
+    float fps = getFPS(lag);
+    float diff = (1.0 / _FPS_LIMIT) - lag;
+
+    int delay = (int)(diff * 1000.0) + lastDelay;
+    lastDelay = delay;
+
+    if(delay <= 0.0)
+        return;
+
+    SDL_Delay(delay);
 }
 
 void mainloop_ChangeScr(ScreenId newscr, void *data)
@@ -119,6 +133,8 @@ void mainloop_Go()
     double lag = 0;
     Uint32 oldticks = 0;
 
+    lastDelay = 0;
+
     mainloop_ChangeScr(SCR_MENU, NULL);
 
     fadeDuration = 1.5;
@@ -129,8 +145,6 @@ void mainloop_Go()
     {
         lag = (double)(SDL_GetTicks() - oldticks) / 1000.0;
         oldticks = SDL_GetTicks();
-
-        getFps(lag);
 
         graphics_ClearBuffer();
 
@@ -154,7 +168,7 @@ void mainloop_Go()
         graphics_BlitBuffer();
 
         timer_CleanTimers();
-        //SDL_Delay(10);
+        fpsLimiterDelay(lag);
     }
 
 }
