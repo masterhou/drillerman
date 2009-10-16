@@ -44,4 +44,6 @@ bcg.c
 bcg.h
 particles.c
 particles.h
+settings.c
+settings.h
 Makefile

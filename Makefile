@@ -26,7 +26,8 @@ OBJECTS		= main.o \
                 stack.o \
                 bcg.o \
                 particles.o \
-                hud.o
+                hud.o \
+                settings.o
 			
 SOURCES		= $(OBJECTS:.o=.c)
 
@@ -59,8 +60,6 @@ install:
 	$(INSTALL_PROGRAM) $(NAME) $(BIN_DIR)
 	$(INSTALL_PROGRAM) -d $(DAT_DIR)
 	cp -r data/* $(DAT_DIR)
-	
-	
 	
 uninstall:
 	$(RM) $(BIN_DIR)/$(NAME)

@@ -31,7 +31,7 @@ static enum
 
 #define _ICON_WIDTH 64.0
 #define _ICON_HEIGHT 64.0
-#define _MENU_RADIUS 150.0
+#define _MENU_RADIUS 125.0
 #define _MENU_X (400.0 - _ICON_WIDTH / 2.0)
 #define _MENU_Y (260.0 - _ICON_HEIGHT / 2.0)
 #define _ARROW_MAX_SHIFT 20.0
@@ -187,7 +187,7 @@ static void center(Sprite *s)
 void menu_Init(void *data)
 {
 
-    sprites_LoadFromCfg("sprites/menu.spr", "");
+    sprites_LoadFromCfg("sprites/menu/menu.spr", "");
     sprites_LoadFontsFromCfg("fonts/fonts.desc");
 
     menuEntry = ME_EXIT;
@@ -250,6 +250,10 @@ int menu_Frame(float lag)
         {
             case ME_1000M:
                 mainloop_ChangeScrWithFade(SCR_GAME, NULL, 1.0);
+            break;
+
+            case ME_SETTINGS:
+                mainloop_ChangeScrWithFade(SCR_SETTINGS, NULL, 1.0);
             break;
         }
     }
