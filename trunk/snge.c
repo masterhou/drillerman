@@ -135,9 +135,10 @@ void snge_FreeSprites()
 IntPoint snge_GetTextSize(Sprite *psprite)
 {
     SpriteClass *sc = sprites_GetClass(psprite->sclass);
+    int len = strlen(psprite->text);
 
     IntPoint sz = {
-        sc->font->charSize.x * strlen(psprite->text),
+        sc->font->charSize.x * len + sc->font->spacing.x * (len - 1),
         sc->font->charSize.y
     };
 

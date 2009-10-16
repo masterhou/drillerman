@@ -8,6 +8,7 @@
 #include "splash.h"
 #include "menu.h"
 #include "exitscr.h"
+#include "settings.h"
 #include "game.h"
 #include "timer.h"
 #include "particles.h"
@@ -40,7 +41,8 @@ static ScreenFuncs scrFuncs[SCR_LAST] =	{
     {init: &exit_Init, cleanup: &exit_Cleanup, frame: &exit_Frame},
     {init: &splash_Init, cleanup: &splash_Cleanup, frame: &splash_Frame},
     {init: &menu_Init, cleanup: &menu_Cleanup, frame: &menu_Frame},
-    {init: &game_Init, cleanup: &game_Cleanup, frame: &game_Frame}
+    {init: &game_Init, cleanup: &game_Cleanup, frame: &game_Frame},
+    {init: &settings_Init, cleanup: &settings_Cleanup, frame: &settings_Frame}
 };
 
 static void procFade(float lag)
@@ -95,7 +97,6 @@ static inline float getFPS(float lag)
 
 static inline void fpsLimiterDelay(float lag)
 {
-    float fps = getFPS(lag);
     float diff = (1.0 / _FPS_LIMIT) - lag;
 
     int delay = (int)(diff * 1000.0) + lastDelay;

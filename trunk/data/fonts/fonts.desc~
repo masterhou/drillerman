@@ -31,14 +31,14 @@ image=small.png
 
 [font:hollow]
 
-char_width=16
+char_width=32
 horz_spacing=0
 
-char_height=16
+char_height=32
 vert_spacing=0
 
-char_string=AMY.BNZ,CO0!DP1?EQ2:FR3;GS4'HT5(IUS)JV7^KW8^LX9^
-chars_in_row=4
+char_string=^!"^^^^'()^^,^.^0123456789:;^=^?^ABCDEFGHIJKLMNOPQRSTUVWXYZ
+chars_in_row=10
 
 case_sensitive=no
 

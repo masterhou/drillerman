@@ -7,6 +7,7 @@ typedef enum
     SCR_SPLASH,
     SCR_MENU,
     SCR_GAME,
+    SCR_SETTINGS,
     SCR_LAST,
     SCR_NONE
 } ScreenId;
